@@ -1836,16 +1836,16 @@ async function loadScrapedDRAM() {
     if (saved) STATE.dramOverrides = JSON.parse(saved);
   } catch(e) {}
 
-  // Try to load scraped Tweakers CSV, then render DRAM
+  // Try to load scraped Tweakers CSV, then render DRAM (local, fast)
   await loadScrapedDRAM();
   renderDRAMCharts();
 
-  // Fetch AI economy data
-  await loadAIEconomy();
-
-  // Show dashboard
+  // Show dashboard immediately — don't block on remote fetches
   document.getElementById('load-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
+
+  // Fetch AI economy data in background (non-blocking)
+  loadAIEconomy();
 
   // Background tasks
   updateCacheStatus();
