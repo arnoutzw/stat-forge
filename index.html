@@ -265,6 +265,53 @@ tr:hover td { background: var(--bg-secondary); }
       </div>
     </div>
 
+    <!-- Dutch Tech Sector -->
+    <div id="cbs-tech-section" style="display:none;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <span style="font-size:14px;font-weight:700;">Netherlands — ICT Sector Deep Dive</span>
+        <span class="source-tag cbs">CBS</span>
+      </div>
+      <div id="cbs-tech-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>ICT Sector Employment (x1000 jobs)</span>
+            <a class="source-link" href="https://opendata.cbs.nl/statline/#/CBS/en/dataset/83583NED" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> CBS 83583NED</a>
+          </div>
+          <div style="position:relative;height:260px;"><canvas id="chart-cbs-ict-jobs"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>ICT Vacancies vs All Sectors</span>
+            <a class="source-link" href="https://opendata.cbs.nl/statline/#/CBS/en/dataset/83599ENG" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> CBS 83599ENG</a>
+          </div>
+          <div style="position:relative;height:260px;"><canvas id="chart-cbs-ict-vac"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Education Pipeline -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:14px;font-weight:700;">Education & Talent Pipeline</span>
+      <span class="source-tag owid">OWID</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>Mean Years of Schooling</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/mean-years-of-schooling-long-run" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
+        <div style="position:relative;height:260px;"><canvas id="chart-edu-tertiary"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>Population with Tertiary Education (%)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/share-of-the-population-with-completed-tertiary-education" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
+        <div style="position:relative;height:260px;"><canvas id="chart-edu-stem"></canvas></div>
+      </div>
+    </div>
+
     <!-- Data table -->
     <details style="margin-top:8px;">
       <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--text-muted);padding:8px 0;">Raw Data Table</summary>
@@ -354,7 +401,7 @@ tr:hover td { background: var(--bg-secondary); }
       <span style="font-size:14px;font-weight:700;">AI Research & Patents</span>
       <span class="source-tag owid">OWID</span>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;">
       <div class="chart-card">
         <div class="chart-title">
           <span>AI Publications (Annual)</span>
@@ -368,6 +415,28 @@ tr:hover td { background: var(--bg-secondary); }
           <a class="source-link" href="https://ourworldindata.org/grapher/artificial-intelligence-patents-submitted" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
         </div>
         <div style="position:relative;height:260px;"><canvas id="chart-ai-patents"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Automation & Robotics -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:14px;font-weight:700;">Automation & Robotics</span>
+      <span class="source-tag owid">OWID</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>Industrial Robots Installed (Annual)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/annual-industrial-robots-installed" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
+        <div style="position:relative;height:260px;"><canvas id="chart-robots-installed"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>Robot Density (per 1000 employees)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/industrial-robots-in-operation-per-1000-employees" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
+        <div style="position:relative;height:260px;"><canvas id="chart-robot-density"></canvas></div>
       </div>
     </div>
   </div>
@@ -427,6 +496,37 @@ tr:hover td { background: var(--bg-secondary); }
           <a class="source-link" href="https://ourworldindata.org/grapher/transistors-per-microprocessor" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
         </div>
         <div style="position:relative;height:300px;"><canvas id="chart-moores-law"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Energy & Power -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:14px;font-weight:700;">Energy & Power</span>
+      <span class="source-tag owid">OWID</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>Per Capita Energy Use (kWh)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/per-capita-energy-use" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
+        <div style="position:relative;height:260px;"><canvas id="chart-energy-capita"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>Electricity Generation (TWh)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/electricity-generation" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
+        <div style="position:relative;height:260px;"><canvas id="chart-elec-gen"></canvas></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>Share of Electricity from Renewables (%)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/share-electricity-renewables" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
+        <div style="position:relative;height:280px;"><canvas id="chart-renewables"></canvas></div>
       </div>
     </div>
   </div>
@@ -684,6 +784,20 @@ const BOOM_INDICATORS = {
     entities: ['World'],
     canvasId: 'chart-ai-patents',
     unit: 'count'
+  },
+  robotsInstalled: {
+    slug: 'annual-industrial-robots-installed',
+    label: 'Industrial Robots Installed',
+    entities: ['World', 'China', 'United States', 'Japan', 'Germany'],
+    canvasId: 'chart-robots-installed',
+    unit: 'count'
+  },
+  robotDensity: {
+    slug: 'industrial-robots-in-operation-per-1000-employees',
+    label: 'Robot Density',
+    entities: ['South Korea', 'Germany', 'Japan', 'United States', 'China'],
+    canvasId: 'chart-robot-density',
+    unit: 'per 1000'
   }
 };
 
@@ -728,6 +842,45 @@ const COMPUTE_INDICATORS = {
     canvasId: 'chart-moores-law',
     unit: 'count',
     logScale: true
+  },
+  energyCapita: {
+    slug: 'per-capita-energy-use',
+    label: 'Energy per Capita',
+    entities: ['World', 'United States', 'Netherlands', 'Germany', 'China'],
+    canvasId: 'chart-energy-capita',
+    unit: 'kWh'
+  },
+  elecGen: {
+    slug: 'electricity-generation',
+    label: 'Electricity Generation',
+    entities: ['World', 'United States', 'China'],
+    canvasId: 'chart-elec-gen',
+    unit: 'TWh'
+  },
+  renewables: {
+    slug: 'share-electricity-renewables',
+    label: 'Renewables Share',
+    entities: ['World', 'United States', 'Netherlands', 'Germany'],
+    canvasId: 'chart-renewables',
+    unit: '%'
+  }
+};
+
+// ─── Education OWID Indicators ───────────────────────────────────────────────
+const EDU_INDICATORS = {
+  tertiary: {
+    slug: 'mean-years-of-schooling-long-run',
+    label: 'Mean Years of Schooling',
+    entities: ['World', 'United States', 'Netherlands', 'Germany', 'Japan'],
+    canvasId: 'chart-edu-tertiary',
+    unit: 'years'
+  },
+  stem: {
+    slug: 'share-of-the-population-with-completed-tertiary-education',
+    label: 'Population with Tertiary Education',
+    entities: ['United States', 'Netherlands', 'Germany', 'Japan', 'United Kingdom'],
+    canvasId: 'chart-edu-stem',
+    unit: '%'
   }
 };
 
@@ -753,6 +906,7 @@ let STATE = {
   cbsData: {},       // keyed by table ID
   boomData: {},      // keyed by BOOM_INDICATORS key
   computeData: {},   // keyed by COMPUTE_INDICATORS key
+  eduData: {},       // keyed by EDU_INDICATORS key
   dramOverrides: [], // user-uploaded CSV
   lastFetch: null,
 };
@@ -827,6 +981,18 @@ async function fetchOWID(slug, countries, timeMin, timeMax) {
   // Cache all years, filter by time on return
   setCache(csvUrl, allData);
   return allData.filter(r => r.Year >= timeMin && r.Year <= timeMax);
+}
+
+async function fetchCBSFiltered(tableId, filter) {
+  const url = `https://opendata.cbs.nl/ODataApi/OData/${tableId}/TypedDataSet?$format=json&$filter=${encodeURIComponent(filter)}&$top=10000`;
+  const cached = getCached(url);
+  if (cached) return cached;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`CBS ${tableId}: ${res.status}`);
+  const json = await res.json();
+  const data = json.value || [];
+  setCache(url, data);
+  return data;
 }
 
 async function fetchCBS(tableId) {
@@ -953,11 +1119,24 @@ async function loadAIEconomy() {
   if (hasCBS) {
     cbsFetches.push(
       fetchCBS('80590eng').then(d => { STATE.cbsData.unemployment = d; }).catch(e => { errors.push('CBS Unemployment: ' + e.message); }),
-      fetchCBS('83599ENG').then(d => { STATE.cbsData.vacancies = d; }).catch(e => { errors.push('CBS Vacancies: ' + e.message); })
+      fetchCBS('83599ENG').then(d => { STATE.cbsData.vacancies = d; }).catch(e => { errors.push('CBS Vacancies: ' + e.message); }),
+      fetchCBS('83583NED').then(d => { STATE.cbsData.ictJobs = d; }).catch(e => { errors.push('CBS ICT Jobs: ' + e.message); }),
+      fetchCBSFiltered('83599ENG', "substringof('391600',SIC2008)").then(d => { STATE.cbsData.ictVacancies = d; }).catch(e => { errors.push('CBS ICT Vacancies: ' + e.message); })
     );
   }
 
-  await Promise.allSettled([...owidFetches, ...cbsFetches]);
+  // Fetch education data
+  const eduFetches = Object.entries(EDU_INDICATORS).map(async ([key, ind]) => {
+    try {
+      const data = await fetchOWIDGlobal(ind.slug, ind.entities);
+      STATE.eduData[key] = data;
+    } catch(e) {
+      errors.push(`${ind.label}: ${e.message}`);
+      STATE.eduData[key] = STATE.eduData[key] || [];
+    }
+  });
+
+  await Promise.allSettled([...owidFetches, ...cbsFetches, ...eduFetches]);
 
   loading.classList.remove('visible');
   content.style.display = 'block';
@@ -970,8 +1149,9 @@ async function loadAIEconomy() {
   STATE.lastFetch = new Date();
   document.getElementById('data-freshness').textContent = 'Updated ' + STATE.lastFetch.toLocaleTimeString();
 
-  // Show/hide CBS section
+  // Show/hide CBS sections
   document.getElementById('cbs-section').style.display = hasCBS ? 'block' : 'none';
+  document.getElementById('cbs-tech-section').style.display = hasCBS ? 'block' : 'none';
 
   renderAICharts();
   renderAIStatCards();
@@ -1049,7 +1229,11 @@ function renderAICharts() {
   if (countries.includes('NLD')) {
     renderCBSUnemployment();
     renderCBSVacancies();
+    renderCBSICTSector();
   }
+
+  // Education charts
+  renderEducationCharts();
 }
 
 function renderIndicatorChart(canvasId, indicatorKey, countries) {
@@ -1173,6 +1357,95 @@ function renderCBSVacancies() {
 
   const labels = filtered.map(r => cbsPeriodLabel(r.period));
   mkLine('chart-cbs-vacancies', labels, [{ label: 'Vacancies (x1000)', data: filtered.map(r => r.value), color: '#3b82f6' }]);
+}
+
+function renderCBSICTSector() {
+  const jobsData = STATE.cbsData.ictJobs || [];
+  const vacData = STATE.cbsData.vacancies || [];
+
+  // ICT Employment: SBI sector J = starts with 'J' or contains 'J '
+  // In 83583NED, sectors use single-letter codes
+  if (jobsData.length) {
+    const ictJobs = jobsData
+      .filter(r => {
+        const sector = r.BedrijfstakkenBranchesSBI2008?.trim();
+        return sector && (sector === 'J' || sector === '391600' || (sector.startsWith('J ') || sector.includes('Informatie')));
+      })
+      .filter(r => r.Perioden && typeof r.Perioden === 'string')
+      .map(r => {
+        const keys = Object.keys(r).filter(k => typeof r[k] === 'number' && k !== 'ID');
+        const val = keys.length ? r[keys[0]] : null;
+        return { period: r.Perioden.trim(), value: val };
+      })
+      .filter(r => r.value !== null && r.value !== undefined)
+      .sort((a, b) => a.period.localeCompare(b.period))
+      .slice(-20);
+
+    if (ictJobs.length) {
+      const labels = ictJobs.map(r => r.period.replace(/\s+/g, '').replace('JJ00', ''));
+      mkLine('chart-cbs-ict-jobs', labels, [{ label: 'ICT Jobs (x1000)', data: ictJobs.map(r => r.value), color: '#22c55e' }]);
+    }
+
+    // Stat cards
+    const latest = ictJobs[ictJobs.length - 1];
+    const prev = ictJobs[ictJobs.length - 2];
+    const cards = [];
+    if (latest) {
+      const yoy = prev ? Math.round(((latest.value - prev.value) / prev.value) * 100) : 0;
+      cards.push({ label: 'ICT Jobs (NL)', value: latest.value.toFixed(1) + 'k', icon: 'monitor', sub: `${latest.period.replace(/\s+/g, '').replace('JJ00', '')}${yoy ? ` · YoY ${yoy >= 0 ? '+' : ''}${yoy}%` : ''}`, subClass: yoy >= 0 ? 'positive' : 'negative' });
+    }
+    document.getElementById('cbs-tech-cards').innerHTML = cards.map(c => `
+      <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <i data-lucide="${c.icon}" style="width:14px;height:14px;color:var(--text-muted);"></i>
+          <span class="stat-label">${c.label}</span>
+        </div>
+        <div class="stat-value">${c.value}</div>
+        ${c.sub ? `<div class="stat-sub ${c.subClass || ''}">${c.sub}</div>` : ''}
+      </div>
+    `).join('');
+    lucide.createIcons();
+  }
+
+  // ICT Vacancies vs total
+  const ictVacData = STATE.cbsData.ictVacancies || [];
+  if (ictVacData.length || vacData.length) {
+    const ictVac = ictVacData
+      .filter(r => r.Regions?.includes('NL01'))
+      .filter(r => r.Periods && typeof r.Periods === 'string' && r.Periods.includes('KW'))
+      .map(r => ({ period: r.Periods.trim(), value: r.UnfilledVacancies_1 }))
+      .filter(r => r.value !== null && typeof r.value === 'number')
+      .sort((a, b) => a.period.localeCompare(b.period))
+      .slice(-20);
+
+    const totalVac = vacData
+      .filter(r => r.SIC2008?.trim() === 'T001081' && r.Regions?.trim() === 'NL01')
+      .filter(r => r.Periods && typeof r.Periods === 'string' && r.Periods.includes('KW'))
+      .map(r => ({ period: r.Periods.trim(), value: r.UnfilledVacancies_1 }))
+      .filter(r => r.value !== null && typeof r.value === 'number')
+      .sort((a, b) => a.period.localeCompare(b.period))
+      .slice(-20);
+
+    if (ictVac.length) {
+      const labels = ictVac.map(r => cbsPeriodLabel(r.period));
+      const datasets = [
+        { label: 'ICT Vacancies', data: ictVac.map(r => r.value), color: '#22c55e' }
+      ];
+      // Add total vacancies on second axis if available
+      if (totalVac.length) {
+        datasets.push({ label: 'All Sectors', data: totalVac.map(r => r.value), color: '#3b82f6' });
+      }
+      mkLine('chart-cbs-ict-vac', labels, datasets);
+    }
+  }
+}
+
+function renderEducationCharts() {
+  for (const [key, ind] of Object.entries(EDU_INDICATORS)) {
+    const data = STATE.eduData[key] || [];
+    if (!data.length) continue;
+    renderGlobalChart(ind.canvasId, data, ind.entities, ind.label);
+  }
 }
 
 function renderAIDataTable() {
@@ -1875,10 +2148,10 @@ function updateChartTheme() {
   CHART_COLORS.gridLight = light ? 'rgba(226,229,240,0.15)' : 'rgba(63,63,70,0.2)';
   CHART_COLORS.text = light ? '#555570' : '#71717a';
   // Re-render visible charts
-  if (STATE.activeSection === 'ai-economy' && STATE.owidData.productivity) renderAICharts();
-  if (STATE.activeSection === 'ai-boom' && STATE._boomLoaded) renderBoomCharts();
-  if (STATE.activeSection === 'compute' && STATE._computeLoaded) renderComputeCharts();
-  if (STATE.activeSection === 'dram') renderDRAMCharts();
+  if (STATE.activeSection === 'ai-economy' && STATE.owidData.productivity) { renderAICharts(); }
+  if (STATE.activeSection === 'ai-boom' && STATE._boomLoaded) { renderBoomCharts(); }
+  if (STATE.activeSection === 'compute' && STATE._computeLoaded) { renderComputeCharts(); }
+  if (STATE.activeSection === 'dram') { renderDRAMCharts(); }
 }
 
 // ─── Source connectivity check ───────────────────────────────────────────────
