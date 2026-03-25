@@ -71,6 +71,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
 /* Chart card */
 .chart-card { background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; padding: 20px; }
 .chart-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.source-link { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 3px; opacity: 0.7; transition: opacity 0.15s, color 0.15s; }
+.source-link:hover { opacity: 1; color: var(--accent); }
 
 /* Table */
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -210,17 +212,24 @@ tr:hover td { background: var(--bg-secondary); }
       <div class="chart-card" style="grid-column:span 2;">
         <div class="chart-title">
           <span>Labor Productivity (Output per hour worked) <span class="source-tag owid">OWID</span></span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/labor-productivity-per-hour-pennworldtable" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
         </div>
         <div style="position:relative;height:280px;"><canvas id="chart-productivity"></canvas></div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
       <div class="chart-card">
-        <div class="chart-title"><span>Unemployment Rate <span class="source-tag owid">OWID</span></span></div>
+        <div class="chart-title">
+          <span>Unemployment Rate <span class="source-tag owid">OWID</span></span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/unemployment-rate" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:260px;"><canvas id="chart-unemployment"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title"><span>Labor Force Participation <span class="source-tag owid">OWID</span></span></div>
+        <div class="chart-title">
+          <span>Labor Force Participation <span class="source-tag owid">OWID</span></span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/labor-force-participation-rate" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:260px;"><canvas id="chart-participation"></canvas></div>
       </div>
     </div>
@@ -233,11 +242,17 @@ tr:hover td { background: var(--bg-secondary); }
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
         <div class="chart-card">
-          <div class="chart-title"><span>Unemployment (Monthly)</span></div>
+          <div class="chart-title">
+            <span>Unemployment (Monthly)</span>
+            <a class="source-link" href="https://opendata.cbs.nl/statline/#/CBS/en/dataset/80590eng" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> CBS 80590eng</a>
+          </div>
           <div style="position:relative;height:260px;"><canvas id="chart-cbs-unemployment"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title"><span>Unfilled Vacancies</span></div>
+          <div class="chart-title">
+            <span>Unfilled Vacancies</span>
+            <a class="source-link" href="https://opendata.cbs.nl/statline/#/CBS/en/dataset/83599ENG" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> CBS 83599ENG</a>
+          </div>
           <div style="position:relative;height:260px;"><canvas id="chart-cbs-vacancies"></canvas></div>
         </div>
       </div>
@@ -281,11 +296,17 @@ tr:hover td { background: var(--bg-secondary); }
     <div id="boom-invest-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px;"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;">
       <div class="chart-card">
-        <div class="chart-title"><span>Private AI Investment (Global)</span></div>
+        <div class="chart-title">
+          <span>Private AI Investment (Global)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/private-investment-in-artificial-intelligence-cset" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:280px;"><canvas id="chart-ai-invest"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title"><span>Generative AI Investment (Global)</span></div>
+        <div class="chart-title">
+          <span>Generative AI Investment (Global)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/global-investment-in-generative-ai" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:280px;"><canvas id="chart-genai-invest"></canvas></div>
       </div>
     </div>
@@ -297,17 +318,26 @@ tr:hover td { background: var(--bg-secondary); }
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
       <div class="chart-card">
-        <div class="chart-title"><span>Companies Using AI (%)</span></div>
+        <div class="chart-title">
+          <span>Companies Using AI (%)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/share-companies-using-artificial-intelligence" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:260px;"><canvas id="chart-ai-companies"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title"><span>Devs Using AI Tools (%)</span></div>
+        <div class="chart-title">
+          <span>Devs Using AI Tools (%)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/share-of-professional-software-developers-using-ai-tools" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:260px;"><canvas id="chart-ai-devs"></canvas></div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:28px;">
       <div class="chart-card">
-        <div class="chart-title"><span>AI Job Postings Share (%)</span></div>
+        <div class="chart-title">
+          <span>AI Job Postings Share (%)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/share-artificial-intelligence-job-postings" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:280px;"><canvas id="chart-ai-jobs"></canvas></div>
       </div>
     </div>
@@ -319,11 +349,17 @@ tr:hover td { background: var(--bg-secondary); }
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
       <div class="chart-card">
-        <div class="chart-title"><span>AI Publications (Annual)</span></div>
+        <div class="chart-title">
+          <span>AI Publications (Annual)</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/annual-scholarly-publications-on-artificial-intelligence" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:260px;"><canvas id="chart-ai-pubs"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title"><span>AI Patent Applications</span></div>
+        <div class="chart-title">
+          <span>AI Patent Applications</span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/artificial-intelligence-patents-submitted" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:260px;"><canvas id="chart-ai-patents"></canvas></div>
       </div>
     </div>
@@ -347,27 +383,42 @@ tr:hover td { background: var(--bg-secondary); }
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
       <div class="chart-card">
-        <div class="chart-title"><span>GPU Performance per Dollar <span class="source-tag owid">OWID</span></span></div>
+        <div class="chart-title">
+          <span>GPU Performance per Dollar <span class="source-tag owid">OWID</span></span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/gpu-price-performance" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:280px;"><canvas id="chart-gpu-perf"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title"><span>AI Training Compute (FLOP) <span class="source-tag owid">OWID</span></span></div>
+        <div class="chart-title">
+          <span>AI Training Compute (FLOP) <span class="source-tag owid">OWID</span></span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/artificial-intelligence-training-computation" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:280px;"><canvas id="chart-ai-compute"></canvas></div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
       <div class="chart-card">
-        <div class="chart-title"><span>US Datacenter Construction Spend <span class="source-tag owid">OWID</span></span></div>
+        <div class="chart-title">
+          <span>US Datacenter Construction Spend <span class="source-tag owid">OWID</span></span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/monthly-spending-data-center-us" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:260px;"><canvas id="chart-datacenter"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title"><span>Memory & Storage Cost History <span class="source-tag owid">OWID</span></span></div>
+        <div class="chart-title">
+          <span>Memory & Storage Cost History <span class="source-tag owid">OWID</span></span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/historical-cost-of-computer-memory-and-storage" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:260px;"><canvas id="chart-memory-cost"></canvas></div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:24px;">
       <div class="chart-card">
-        <div class="chart-title"><span>Transistors per Microprocessor (Moore's Law) <span class="source-tag owid">OWID</span></span></div>
+        <div class="chart-title">
+          <span>Transistors per Microprocessor (Moore's Law) <span class="source-tag owid">OWID</span></span>
+          <a class="source-link" href="https://ourworldindata.org/grapher/transistors-per-microprocessor" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Source</a>
+        </div>
         <div style="position:relative;height:300px;"><canvas id="chart-moores-law"></canvas></div>
       </div>
     </div>
@@ -408,17 +459,26 @@ tr:hover td { background: var(--bg-secondary); }
   <!-- Charts -->
   <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:24px;">
     <div class="chart-card">
-      <div class="chart-title"><span>Price per GB Over Time (USD)</span></div>
+      <div class="chart-title">
+        <span id="dram-price-title">Price per GB Over Time (USD)</span>
+        <a class="source-link" href="https://tweakers.net/geheugen-intern/vergelijken/" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Tweakers Pricewatch</a>
+      </div>
       <div style="position:relative;height:300px;"><canvas id="chart-dram-price"></canvas></div>
     </div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
     <div class="chart-card">
-      <div class="chart-title"><span>Kit Price Comparison (16GB)</span></div>
+      <div class="chart-title">
+        <span>Kit Price Comparison (16GB)</span>
+        <a class="source-link" href="https://tweakers.net/geheugen-intern/vergelijken/" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Tweakers</a>
+      </div>
       <div style="position:relative;height:260px;"><canvas id="chart-dram-kit"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title"><span>DDR5 Premium over DDR4</span></div>
+      <div class="chart-title">
+        <span>DDR5 Premium over DDR4</span>
+        <a class="source-link" href="https://tweakers.net/geheugen-intern/vergelijken/" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> Tweakers</a>
+      </div>
       <div style="position:relative;height:260px;"><canvas id="chart-dram-premium"></canvas></div>
     </div>
   </div>
@@ -1548,7 +1608,7 @@ function renderDRAMCharts() {
   const currencyLabel = STATE.dramSource === 'tweakers' ? 'EUR' : 'USD';
 
   // Update chart title and button labels to reflect currency
-  const priceTitle = document.querySelector('#chart-dram-price')?.closest('.chart-card')?.querySelector('.chart-title span');
+  const priceTitle = document.getElementById('dram-price-title');
   if (priceTitle) priceTitle.innerHTML = `Price per GB Over Time (${currencyLabel}) ${STATE.dramSource === 'tweakers' ? '<span class="source-tag cbs" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">Tweakers</span>' : ''}`;
   const pgbBtn = document.getElementById('btn-price-per-gb');
   if (pgbBtn) pgbBtn.textContent = `${currency}/GB`;
