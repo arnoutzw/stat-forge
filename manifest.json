@@ -1,0 +1,17 @@
+{
+  "name": "StatForge",
+  "short_name": "StatForge",
+  "description": "Statistics dashboard for bureau data — AI economy tracker & DRAM market",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%2309090b'/%3E%3Cpath d='M128 384V224l64-96v256zm80 0V192l64-64v256zm80 0V160l64-32v256zm80 0V128l64 0v256z' fill='%23f59e0b' opacity='0.9'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

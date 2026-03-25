@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#09090b" id="metaThemeColor">
+<title>StatForge</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root {
+  --bg-body: #09090b; --bg-primary: #18181b; --bg-secondary: #27272a;
+  --bg-hover: #3f3f46; --text-primary: #f4f4f5; --text-secondary: #d4d4d8;
+  --text-muted: #71717a; --accent: #f59e0b; --accent-hover: #fbbf24;
+  --border: #3f3f46; --border-light: #27272a;
+  --green: #4ade80; --red: #f87171; --blue: #60a5fa;
+}
+[data-theme="light"] {
+  --bg-body: #ffffff; --bg-primary: #ffffff; --bg-secondary: #f8f9fb;
+  --bg-hover: #e8eaf0; --text-primary: #081249; --text-secondary: #2b2a3e;
+  --text-muted: #555570; --accent: #10069f; --accent-hover: #1297e4;
+  --border: #e2e5f0; --border-light: #e8eaf0;
+  --green: #16a34a; --red: #dc2626; --blue: #2563eb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-primary); }
+code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-body); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--bg-hover); }
+
+/* Layout */
+.sidebar { position: fixed; top: 0; left: 0; width: 220px; height: 100vh; background: var(--bg-primary); border-right: 1px solid var(--border-light); padding: 20px 12px; overflow-y: auto; z-index: 50; display: flex; flex-direction: column; }
+.main-content { margin-left: 220px; padding: 28px 32px; max-width: 1400px; }
+@media (max-width: 900px) { .sidebar { width: 100%; height: auto; position: relative; } .main-content { margin-left: 0; padding: 16px; } }
+
+/* Nav */
+.nav-link { color: var(--text-muted); transition: color 0.15s; cursor: pointer; display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 6px; font-size: 13px; }
+.nav-link:hover { color: var(--text-primary); background: var(--bg-secondary); }
+.nav-link.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.section { display: none; }
+.section.active { display: block; }
+
+/* Badges */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+.badge-amber { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.badge-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+.badge-zinc { background: rgba(161,161,170,0.12); color: #a1a1aa; }
+.badge-red { background: rgba(248,113,113,0.15); color: #f87171; }
+[data-theme="light"] .badge-amber { background: rgba(245,158,11,0.12); color: #b45309; }
+[data-theme="light"] .badge-blue { background: rgba(16,6,159,0.1); color: #10069f; }
+[data-theme="light"] .badge-green { background: rgba(22,163,74,0.12); color: #16a34a; }
+[data-theme="light"] .badge-red { background: rgba(220,38,38,0.12); color: #dc2626; }
+
+/* Cards */
+.stat-card { background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; padding: 20px; }
+.stat-value { font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--accent); line-height: 1; }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+.stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+.stat-sub.positive { color: var(--green); }
+.stat-sub.negative { color: var(--red); }
+
+/* Chart card */
+.chart-card { background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; padding: 20px; }
+.chart-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+
+/* Table */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 9px 12px; background: var(--bg-secondary); color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--border-light); color: var(--text-secondary); vertical-align: middle; }
+tr:hover td { background: var(--bg-secondary); }
+
+/* Toggle buttons */
+.toggle-btn { padding: 3px 10px; border-radius: 5px; font-size: 11px; font-family: 'JetBrains Mono', monospace; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-muted); transition: all 0.15s; }
+.toggle-btn:hover, .toggle-btn.active { background: rgba(245,158,11,0.12); color: var(--accent); border-color: var(--accent); }
+
+/* Controls bar */
+.controls-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; padding: 12px 16px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; }
+.control-group { display: flex; align-items: center; gap: 6px; }
+.control-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-right: 4px; }
+
+/* Loading & error */
+.section-loading { display: none; align-items: center; justify-content: center; padding: 60px; color: var(--text-muted); gap: 12px; }
+.section-loading.visible { display: flex; }
+.spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-banner { display: none; padding: 10px 16px; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: 8px; color: var(--red); font-size: 12px; margin-bottom: 16px; }
+.error-banner.visible { display: flex; align-items: center; gap: 8px; }
+
+/* CBS indicator */
+.source-tag { font-size: 9px; font-family: 'JetBrains Mono', monospace; padding: 1px 5px; border-radius: 3px; font-weight: 600; }
+.source-tag.owid { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.source-tag.cbs { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+/* Drop zone for CSV */
+.drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="load-screen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg-body);">
+  <div style="text-align:center;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;">
+      <div style="width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+        <i data-lucide="bar-chart-3" style="width:20px;height:20px;color:#09090b;"></i>
+      </div>
+      <div class="mono" style="font-weight:800;font-size:20px;">StatForge</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text-muted);font-size:13px;">
+      <div class="spinner"></div>
+      <span>Fetching latest data...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" style="display:none;">
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;padding:0 2px;">
+    <div style="width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <i data-lucide="bar-chart-3" style="width:16px;height:16px;color:#09090b;"></i>
+    </div>
+    <div>
+      <div class="mono" style="font-weight:700;font-size:13px;">StatForge</div>
+      <div style="font-size:10px;color:var(--text-muted);">Bureau data insights</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:1px;flex:1;" id="nav">
+    <a class="nav-link active" onclick="showSection('ai-economy',this)">
+      <i data-lucide="brain-circuit" style="width:14px;height:14px;"></i> AI Economy</a>
+    <a class="nav-link" onclick="showSection('dram',this)">
+      <i data-lucide="cpu" style="width:14px;height:14px;"></i> DRAM Market</a>
+    <a class="nav-link" onclick="showSection('settings',this)">
+      <i data-lucide="settings" style="width:14px;height:14px;"></i> Settings</a>
+  </div>
+
+  <div style="padding-top:12px;border-top:1px solid var(--border-light);display:flex;flex-direction:column;gap:4px;">
+    <button onclick="toggleTheme()" class="nav-link" style="width:100%;background:none;text-align:left;">
+      <i data-lucide="sun-moon" style="width:14px;height:14px;"></i> Toggle theme</button>
+    <div style="font-size:10px;color:var(--text-muted);padding:4px 10px;font-family:'JetBrains Mono',monospace;" id="data-freshness">
+      No data loaded
+    </div>
+  </div>
+</div>
+
+<!-- Main content -->
+<div class="main-content">
+
+<!-- AI ECONOMY TRACKER -->
+<div class="section active" id="section-ai-economy">
+  <div style="margin-bottom:20px;">
+    <h1 style="font-size:22px;font-weight:800;margin-bottom:3px;">AI Economy Tracker</h1>
+    <p style="font-size:13px;color:var(--text-muted);">Productivity, employment & labor market data from OWID and CBS Netherlands.</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <div class="control-group">
+      <span class="control-label">Country</span>
+      <button class="toggle-btn active" onclick="toggleCountry('NLD',this)">NLD</button>
+      <button class="toggle-btn active" onclick="toggleCountry('USA',this)">USA</button>
+      <button class="toggle-btn" onclick="toggleCountry('EU',this)">EU</button>
+      <button class="toggle-btn" onclick="toggleCountry('GBR',this)">GBR</button>
+      <button class="toggle-btn" onclick="toggleCountry('DEU',this)">DEU</button>
+      <button class="toggle-btn" onclick="toggleCountry('JPN',this)">JPN</button>
+    </div>
+    <div style="width:1px;height:20px;background:var(--border);"></div>
+    <div class="control-group">
+      <span class="control-label">Range</span>
+      <button class="toggle-btn" onclick="setTimeRange('5Y',this)">5Y</button>
+      <button class="toggle-btn active" onclick="setTimeRange('10Y',this)">10Y</button>
+      <button class="toggle-btn" onclick="setTimeRange('20Y',this)">20Y</button>
+      <button class="toggle-btn" onclick="setTimeRange('All',this)">All</button>
+    </div>
+  </div>
+
+  <!-- Error banner -->
+  <div class="error-banner" id="ai-economy-error"></div>
+
+  <!-- Loading -->
+  <div class="section-loading" id="ai-economy-loading">
+    <div class="spinner"></div>
+    <span>Fetching economic data...</span>
+  </div>
+
+  <!-- Content (hidden until data loads) -->
+  <div id="ai-economy-content" style="display:none;">
+    <!-- Stat cards -->
+    <div id="ai-stat-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px;"></div>
+
+    <!-- Charts grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+      <div class="chart-card" style="grid-column:span 2;">
+        <div class="chart-title">
+          <span>Labor Productivity (Output per hour worked) <span class="source-tag owid">OWID</span></span>
+        </div>
+        <div style="position:relative;height:280px;"><canvas id="chart-productivity"></canvas></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-title"><span>Unemployment Rate <span class="source-tag owid">OWID</span></span></div>
+        <div style="position:relative;height:260px;"><canvas id="chart-unemployment"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>Labor Force Participation <span class="source-tag owid">OWID</span></span></div>
+        <div style="position:relative;height:260px;"><canvas id="chart-participation"></canvas></div>
+      </div>
+    </div>
+
+    <!-- CBS NL section -->
+    <div id="cbs-section">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <span style="font-size:14px;font-weight:700;">Netherlands — CBS Open Data</span>
+        <span class="source-tag cbs">CBS</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+        <div class="chart-card">
+          <div class="chart-title"><span>Unemployment (Monthly)</span></div>
+          <div style="position:relative;height:260px;"><canvas id="chart-cbs-unemployment"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span>Unfilled Vacancies</span></div>
+          <div style="position:relative;height:260px;"><canvas id="chart-cbs-vacancies"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data table -->
+    <details style="margin-top:8px;">
+      <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--text-muted);padding:8px 0;">Raw Data Table</summary>
+      <div class="chart-card" style="padding:0;overflow:hidden;margin-top:8px;">
+        <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
+          <table id="ai-data-table">
+            <thead><tr>
+              <th>Year</th><th>Country</th><th>Productivity</th><th>Unemployment %</th><th>Participation %</th><th>Source</th>
+            </tr></thead>
+            <tbody id="ai-data-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- DRAM MARKET -->
+<div class="section" id="section-dram">
+  <div style="margin-bottom:20px;">
+    <h1 style="font-size:22px;font-weight:800;margin-bottom:3px;">DRAM Market Dashboard</h1>
+    <p style="font-size:13px;color:var(--text-muted);">Historical memory pricing trends — DDR4 vs DDR5.</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <div class="control-group">
+      <span class="control-label">Type</span>
+      <button class="toggle-btn active" onclick="setDramType('both',this)">Both</button>
+      <button class="toggle-btn" onclick="setDramType('ddr4',this)">DDR4</button>
+      <button class="toggle-btn" onclick="setDramType('ddr5',this)">DDR5</button>
+    </div>
+    <div style="width:1px;height:20px;background:var(--border);"></div>
+    <div class="control-group">
+      <span class="control-label">Metric</span>
+      <button class="toggle-btn active" id="btn-price-per-gb" onclick="setDramMetric('pricePerGB',this)">$/GB</button>
+      <button class="toggle-btn" onclick="setDramMetric('kitPrice',this)">Kit Price</button>
+    </div>
+    <div style="flex:1;"></div>
+    <button class="toggle-btn" onclick="document.getElementById('csv-upload').click()" style="gap:4px;display:flex;align-items:center;">
+      <i data-lucide="upload" style="width:12px;height:12px;"></i> Import CSV
+    </button>
+    <input type="file" id="csv-upload" accept=".csv" style="display:none">
+  </div>
+
+  <!-- Stat cards -->
+  <div id="dram-stat-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px;"></div>
+
+  <!-- Charts -->
+  <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:24px;">
+    <div class="chart-card">
+      <div class="chart-title"><span>Price per GB Over Time (USD)</span></div>
+      <div style="position:relative;height:300px;"><canvas id="chart-dram-price"></canvas></div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+    <div class="chart-card">
+      <div class="chart-title"><span>Kit Price Comparison (16GB)</span></div>
+      <div style="position:relative;height:260px;"><canvas id="chart-dram-kit"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>DDR5 Premium over DDR4</span></div>
+      <div style="position:relative;height:260px;"><canvas id="chart-dram-premium"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CSV upload zone -->
+  <div class="drop-zone" id="dram-drop-zone" onclick="document.getElementById('csv-upload').click()">
+    <i data-lucide="file-spreadsheet" style="width:28px;height:28px;color:var(--text-muted);margin-bottom:8px;display:block;margin:0 auto 8px;"></i>
+    <p style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Upload custom DRAM price data</p>
+    <p style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">CSV format: date, type (ddr4/ddr5), pricePerGB, kitPrice, capacity</p>
+  </div>
+
+  <!-- Data table -->
+  <details style="margin-top:16px;">
+    <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--text-muted);padding:8px 0;">Price Data Table</summary>
+    <div class="chart-card" style="padding:0;overflow:hidden;margin-top:8px;">
+      <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
+        <table>
+          <thead><tr>
+            <th>Date</th><th>Type</th><th>$/GB</th><th>Kit Price</th><th>Capacity</th>
+          </tr></thead>
+          <tbody id="dram-data-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+</div>
+
+<!-- SETTINGS -->
+<div class="section" id="section-settings">
+  <h1 style="font-size:22px;font-weight:800;margin-bottom:6px;">Settings</h1>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">Cache management & data source status.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="stat-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <i data-lucide="database" style="width:14px;height:14px;color:var(--text-muted);"></i>
+        <span class="stat-label">Cache</span>
+      </div>
+      <div id="cache-status" style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Checking...</div>
+      <button class="toggle-btn" onclick="clearCache()" style="padding:6px 14px;">Clear Cache</button>
+    </div>
+    <div class="stat-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <i data-lucide="wifi" style="width:14px;height:14px;color:var(--text-muted);"></i>
+        <span class="stat-label">Data Sources</span>
+      </div>
+      <div id="source-status" style="font-size:13px;color:var(--text-secondary);"></div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="margin-top:14px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <i data-lucide="info" style="width:14px;height:14px;color:var(--text-muted);"></i>
+      <span class="stat-label">About</span>
+    </div>
+    <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+      <strong>StatForge</strong> — Statistics bureau data dashboard<br>
+      Data sources: Our World in Data (OWID) &amp; CBS Netherlands<br>
+      DRAM data from Tweakers.net Pricewatch (scraped daily) + CSV uploads<br>
+      <span class="mono" style="font-size:11px;color:var(--text-muted);">v1.0.0 — Black Sphere Industries</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+</div><!-- /dashboard -->
+
+<script>
+'use strict';
+
+// ─── Static DRAM Data ────────────────────────────────────────────────────────
+const DRAM_DATA = {
+  lastUpdated: '2026-03-24',
+  sources: ["Tom's Hardware", 'PCPartPicker', 'TechSpot'],
+  series: {
+    ddr4: [
+      { date: '2020-01', pricePerGB: 4.50, kitPrice: 72, capacity: 16 },
+      { date: '2020-04', pricePerGB: 3.80, kitPrice: 61, capacity: 16 },
+      { date: '2020-07', pricePerGB: 3.40, kitPrice: 54, capacity: 16 },
+      { date: '2020-10', pricePerGB: 3.20, kitPrice: 51, capacity: 16 },
+      { date: '2021-01', pricePerGB: 3.50, kitPrice: 56, capacity: 16 },
+      { date: '2021-04', pricePerGB: 4.10, kitPrice: 66, capacity: 16 },
+      { date: '2021-07', pricePerGB: 4.30, kitPrice: 69, capacity: 16 },
+      { date: '2021-10', pricePerGB: 3.90, kitPrice: 62, capacity: 16 },
+      { date: '2022-01', pricePerGB: 3.60, kitPrice: 58, capacity: 16 },
+      { date: '2022-04', pricePerGB: 3.10, kitPrice: 50, capacity: 16 },
+      { date: '2022-07', pricePerGB: 2.50, kitPrice: 40, capacity: 16 },
+      { date: '2022-10', pricePerGB: 2.00, kitPrice: 32, capacity: 16 },
+      { date: '2023-01', pricePerGB: 1.80, kitPrice: 29, capacity: 16 },
+      { date: '2023-04', pricePerGB: 1.60, kitPrice: 26, capacity: 16 },
+      { date: '2023-07', pricePerGB: 1.50, kitPrice: 24, capacity: 16 },
+      { date: '2023-10', pricePerGB: 1.70, kitPrice: 27, capacity: 16 },
+      { date: '2024-01', pricePerGB: 1.90, kitPrice: 30, capacity: 16 },
+      { date: '2024-04', pricePerGB: 2.10, kitPrice: 34, capacity: 16 },
+      { date: '2024-07', pricePerGB: 2.00, kitPrice: 32, capacity: 16 },
+      { date: '2024-10', pricePerGB: 1.80, kitPrice: 29, capacity: 16 },
+      { date: '2025-01', pricePerGB: 1.60, kitPrice: 26, capacity: 16 },
+      { date: '2025-04', pricePerGB: 1.50, kitPrice: 24, capacity: 16 },
+      { date: '2025-07', pricePerGB: 1.40, kitPrice: 22, capacity: 16 },
+      { date: '2025-10', pricePerGB: 1.50, kitPrice: 24, capacity: 16 },
+      { date: '2026-01', pricePerGB: 1.60, kitPrice: 26, capacity: 16 },
+    ],
+    ddr5: [
+      { date: '2022-01', pricePerGB: 12.00, kitPrice: 192, capacity: 16 },
+      { date: '2022-04', pricePerGB: 9.50, kitPrice: 152, capacity: 16 },
+      { date: '2022-07', pricePerGB: 7.50, kitPrice: 120, capacity: 16 },
+      { date: '2022-10', pricePerGB: 5.80, kitPrice: 93, capacity: 16 },
+      { date: '2023-01', pricePerGB: 4.50, kitPrice: 72, capacity: 16 },
+      { date: '2023-04', pricePerGB: 3.60, kitPrice: 58, capacity: 16 },
+      { date: '2023-07', pricePerGB: 3.00, kitPrice: 48, capacity: 16 },
+      { date: '2023-10', pricePerGB: 3.30, kitPrice: 53, capacity: 16 },
+      { date: '2024-01', pricePerGB: 3.50, kitPrice: 56, capacity: 16 },
+      { date: '2024-04', pricePerGB: 3.80, kitPrice: 61, capacity: 16 },
+      { date: '2024-07', pricePerGB: 3.40, kitPrice: 54, capacity: 16 },
+      { date: '2024-10', pricePerGB: 3.00, kitPrice: 48, capacity: 16 },
+      { date: '2025-01', pricePerGB: 2.80, kitPrice: 45, capacity: 16 },
+      { date: '2025-04', pricePerGB: 2.50, kitPrice: 40, capacity: 16 },
+      { date: '2025-07', pricePerGB: 2.30, kitPrice: 37, capacity: 16 },
+      { date: '2025-10', pricePerGB: 2.50, kitPrice: 40, capacity: 16 },
+      { date: '2026-01', pricePerGB: 2.70, kitPrice: 43, capacity: 16 },
+    ]
+  }
+};
+
+// ─── OWID Indicator Config ───────────────────────────────────────────────────
+const OWID_INDICATORS = {
+  productivity: {
+    slug: 'labor-productivity-per-hour-pennworldtable',
+    label: 'Labor Productivity',
+    unit: 'Index',
+    column: 'Productivity: output per hour worked'
+  },
+  unemployment: {
+    slug: 'unemployment-rate',
+    label: 'Unemployment Rate',
+    unit: '%',
+    column: 'Unemployment, total (% of total labor force) (modeled ILO estimate)'
+  },
+  participation: {
+    slug: 'labor-force-participation-rate',
+    label: 'Labor Participation',
+    unit: '%',
+    column: null
+  }
+};
+
+// ─── Country Mapping ─────────────────────────────────────────────────────────
+const COUNTRY_MAP = {
+  NLD: { owid: 'Netherlands', flag: '\ud83c\uddf3\ud83c\uddf1', cbs: true },
+  USA: { owid: 'United States', flag: '\ud83c\uddfa\ud83c\uddf8', cbs: false },
+  EU:  { owid: 'European Union', flag: '\ud83c\uddea\ud83c\uddfa', cbs: false },
+  GBR: { owid: 'United Kingdom', flag: '\ud83c\uddec\ud83c\udde7', cbs: false },
+  DEU: { owid: 'Germany', flag: '\ud83c\udde9\ud83c\uddea', cbs: false },
+  JPN: { owid: 'Japan', flag: '\ud83c\uddef\ud83c\uddf5', cbs: false },
+};
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let STATE = {
+  activeSection: 'ai-economy',
+  selectedCountries: ['NLD', 'USA'],
+  timeRange: '10Y',
+  dramType: 'both',
+  dramMetric: 'pricePerGB',
+  owidData: {},      // keyed by indicator slug
+  cbsData: {},       // keyed by table ID
+  dramOverrides: [], // user-uploaded CSV
+  lastFetch: null,
+};
+
+const charts = {};
+
+// ─── Cache Layer ─────────────────────────────────────────────────────────────
+const CACHE_KEY = 'statforge_cache';
+const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
+
+function getCached(url) {
+  try {
+    const stored = localStorage.getItem(CACHE_KEY);
+    if (!stored) return null;
+    const cache = JSON.parse(stored);
+    const entry = cache[url];
+    if (!entry || Date.now() - entry.ts > CACHE_TTL) return null;
+    return entry.data;
+  } catch(e) { return null; }
+}
+
+function setCache(url, data) {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    stored[url] = { data, ts: Date.now() };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(stored));
+  } catch(e) { /* quota exceeded — ignore */ }
+}
+
+function clearCache() {
+  localStorage.removeItem(CACHE_KEY);
+  localStorage.removeItem('statforge_dram_overrides');
+  STATE.dramOverrides = [];
+  updateCacheStatus();
+  alert('Cache cleared. Refresh to re-fetch data.');
+}
+
+function updateCacheStatus() {
+  const el = document.getElementById('cache-status');
+  try {
+    const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    const keys = Object.keys(stored);
+    if (keys.length === 0) { el.textContent = 'Cache is empty'; return; }
+    const oldest = Math.min(...keys.map(k => stored[k].ts));
+    const age = Math.round((Date.now() - oldest) / 60000);
+    el.textContent = `${keys.length} cached entries \u00b7 oldest ${age}min ago`;
+  } catch(e) { el.textContent = 'Cache is empty'; }
+}
+
+// ─── API Layer ───────────────────────────────────────────────────────────────
+async function fetchOWID(slug, countries, timeMin, timeMax) {
+  const countryNames = countries.map(c => COUNTRY_MAP[c]?.owid).filter(Boolean);
+  const countryParam = countryNames.join('~');
+  // Use full CSV (not csvType=filtered which reduces data points)
+  const csvUrl = `https://ourworldindata.org/grapher/${slug}.csv?useColumnShortNames=false&country=${countryParam}`;
+
+  const cached = getCached(csvUrl);
+  if (cached) {
+    // Apply time filter on cached data
+    return cached.filter(r => r.Year >= timeMin && r.Year <= timeMax);
+  }
+
+  const res = await fetch(csvUrl);
+  if (!res.ok) throw new Error(`OWID ${slug}: ${res.status}`);
+  const text = await res.text();
+  const parsed = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true });
+
+  // Filter to only requested countries
+  const nameSet = new Set(countryNames);
+  const allData = parsed.data.filter(r => nameSet.has(r.Entity));
+
+  // Cache all years, filter by time on return
+  setCache(csvUrl, allData);
+  return allData.filter(r => r.Year >= timeMin && r.Year <= timeMax);
+}
+
+async function fetchCBS(tableId) {
+  const url = `https://opendata.cbs.nl/ODataApi/OData/${tableId}/TypedDataSet?$format=json&$top=10000`;
+
+  const cached = getCached(url);
+  if (cached) return cached;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`CBS ${tableId}: ${res.status}`);
+  const json = await res.json();
+  const data = json.value || [];
+  setCache(url, data);
+  return data;
+}
+
+// ─── Chart Config ────────────────────────────────────────────────────────────
+const CHART_COLORS = {
+  primary: '#f59e0b',
+  grid: 'rgba(63,63,70,0.4)',
+  gridLight: 'rgba(63,63,70,0.2)',
+  text: '#71717a',
+};
+const PALETTE = ['#f59e0b','#3b82f6','#22c55e','#8b5cf6','#ef4444','#06b6d4','#ec4899','#f97316','#a3e635','#e879f9'];
+
+function chartDefaults() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: true, position: 'top', labels: { color: CHART_COLORS.text, font: { family: "'JetBrains Mono'", size: 11 }, boxWidth: 12, padding: 10 } },
+      tooltip: { backgroundColor: '#18181b', borderColor: '#3f3f46', borderWidth: 1, titleColor: '#f4f4f5', bodyColor: '#a1a1aa', padding: 10 }
+    },
+    scales: {
+      x: { grid: { color: CHART_COLORS.gridLight }, ticks: { color: CHART_COLORS.text, maxRotation: 45, font: { family: "'JetBrains Mono'", size: 11 } } },
+      y: { grid: { color: CHART_COLORS.gridLight }, ticks: { color: CHART_COLORS.text, font: { family: "'JetBrains Mono'", size: 11 } } }
+    }
+  };
+}
+
+function mkLine(id, labels, datasets) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return null;
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: datasets.map((ds, i) => ({
+        label: ds.label,
+        data: ds.data,
+        borderColor: ds.color || PALETTE[i % PALETTE.length],
+        backgroundColor: (ds.color || PALETTE[i % PALETTE.length]) + '22',
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        fill: ds.fill || false,
+        tension: 0.3,
+      }))
+    },
+    options: chartDefaults()
+  });
+  return charts[id];
+}
+
+function mkBar(id, labels, data, label, color) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return null;
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label, data, backgroundColor: (color || CHART_COLORS.primary) + '99', borderColor: color || CHART_COLORS.primary, borderWidth: 1, borderRadius: 3 }] },
+    options: chartDefaults()
+  });
+  return charts[id];
+}
+
+// ─── Time range helpers ──────────────────────────────────────────────────────
+function getTimeRange() {
+  const now = new Date().getFullYear();
+  switch (STATE.timeRange) {
+    case '5Y': return { min: now - 5, max: now };
+    case '10Y': return { min: now - 10, max: now };
+    case '20Y': return { min: now - 20, max: now };
+    default: return { min: 1950, max: now };
+  }
+}
+
+// ─── AI Economy: Fetch & Render ──────────────────────────────────────────────
+async function loadAIEconomy() {
+  const loading = document.getElementById('ai-economy-loading');
+  const content = document.getElementById('ai-economy-content');
+  const errorEl = document.getElementById('ai-economy-error');
+
+  loading.classList.add('visible');
+  content.style.display = 'none';
+  errorEl.classList.remove('visible');
+
+  const { min, max } = getTimeRange();
+  const countries = STATE.selectedCountries;
+  const errors = [];
+
+  // Fetch OWID data in parallel
+  const owidFetches = Object.entries(OWID_INDICATORS).map(async ([key, ind]) => {
+    try {
+      const data = await fetchOWID(ind.slug, countries, min, max);
+      STATE.owidData[key] = data;
+    } catch(e) {
+      errors.push(`OWID ${ind.label}: ${e.message}`);
+      STATE.owidData[key] = STATE.owidData[key] || []; // keep stale
+    }
+  });
+
+  // Fetch CBS if NLD selected
+  const hasCBS = countries.includes('NLD');
+  const cbsFetches = [];
+  if (hasCBS) {
+    cbsFetches.push(
+      fetchCBS('80590eng').then(d => { STATE.cbsData.unemployment = d; }).catch(e => { errors.push('CBS Unemployment: ' + e.message); }),
+      fetchCBS('83599ENG').then(d => { STATE.cbsData.vacancies = d; }).catch(e => { errors.push('CBS Vacancies: ' + e.message); })
+    );
+  }
+
+  await Promise.allSettled([...owidFetches, ...cbsFetches]);
+
+  loading.classList.remove('visible');
+  content.style.display = 'block';
+
+  if (errors.length) {
+    errorEl.textContent = errors.join(' | ');
+    errorEl.classList.add('visible');
+  }
+
+  STATE.lastFetch = new Date();
+  document.getElementById('data-freshness').textContent = 'Updated ' + STATE.lastFetch.toLocaleTimeString();
+
+  // Show/hide CBS section
+  document.getElementById('cbs-section').style.display = hasCBS ? 'block' : 'none';
+
+  renderAICharts();
+  renderAIStatCards();
+  renderAIDataTable();
+  updateCacheStatus();
+}
+
+function renderAIStatCards() {
+  const cards = [];
+
+  // Latest productivity per selected country
+  const prodData = STATE.owidData.productivity || [];
+  if (prodData.length) {
+    const latest = prodData.filter(r => r.Year).sort((a, b) => b.Year - a.Year);
+    for (const code of STATE.selectedCountries.slice(0, 2)) {
+      const name = COUNTRY_MAP[code]?.owid;
+      const row = latest.find(r => r.Entity === name);
+      if (row) {
+        const val = getNumericValue(row);
+        cards.push({ label: `${code} Productivity`, value: val !== null ? val.toFixed(1) : '—', icon: 'trending-up', sub: `Year ${row.Year} \u00b7 Output/hour` });
+      }
+    }
+  }
+
+  // Latest unemployment
+  const unempData = STATE.owidData.unemployment || [];
+  if (unempData.length) {
+    const latest = unempData.filter(r => r.Year).sort((a, b) => b.Year - a.Year);
+    for (const code of STATE.selectedCountries.slice(0, 2)) {
+      const name = COUNTRY_MAP[code]?.owid;
+      const row = latest.find(r => r.Entity === name);
+      if (row) {
+        const val = getNumericValue(row);
+        cards.push({ label: `${code} Unemployment`, value: val !== null ? val.toFixed(1) + '%' : '—', icon: 'users', sub: `Year ${row.Year}` });
+      }
+    }
+  }
+
+  document.getElementById('ai-stat-cards').innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <i data-lucide="${c.icon}" style="width:14px;height:14px;color:var(--text-muted);"></i>
+        <span class="stat-label">${c.label}</span>
+      </div>
+      <div class="stat-value">${c.value}</div>
+      ${c.sub ? `<div class="stat-sub">${c.sub}</div>` : ''}
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+function getNumericValue(row) {
+  // Get the first numeric non-metadata value
+  for (const [key, val] of Object.entries(row)) {
+    if (key === 'Year' || key === 'Entity' || key === 'Code') continue;
+    if (key.includes('Original Year')) continue;
+    if (typeof val === 'number' && !isNaN(val)) return val;
+  }
+  return null;
+}
+
+function renderAICharts() {
+  const countries = STATE.selectedCountries;
+
+  // Productivity chart
+  renderIndicatorChart('chart-productivity', 'productivity', countries);
+
+  // Unemployment chart
+  renderIndicatorChart('chart-unemployment', 'unemployment', countries);
+
+  // Participation chart
+  renderIndicatorChart('chart-participation', 'participation', countries);
+
+  // CBS charts
+  if (countries.includes('NLD')) {
+    renderCBSUnemployment();
+    renderCBSVacancies();
+  }
+}
+
+function renderIndicatorChart(canvasId, indicatorKey, countries) {
+  const data = STATE.owidData[indicatorKey] || [];
+  if (!data.length) return;
+
+  // Group by country
+  const byCountry = {};
+  for (const row of data) {
+    const entity = row.Entity || row.entity;
+    if (!entity) continue;
+    if (!byCountry[entity]) byCountry[entity] = [];
+    byCountry[entity].push(row);
+  }
+
+  // Get all unique years across all countries and sort
+  const allYears = [...new Set(data.map(r => r.Year).filter(Boolean))].sort((a, b) => a - b);
+  const labels = allYears.map(String);
+
+  const datasets = [];
+  let colorIdx = 0;
+  for (const code of countries) {
+    const name = COUNTRY_MAP[code]?.owid;
+    const countryData = byCountry[name];
+    if (!countryData) continue;
+
+    const valueMap = {};
+    for (const row of countryData) {
+      const val = getNumericValue(row);
+      if (val !== null) valueMap[row.Year] = val;
+    }
+
+    datasets.push({
+      label: code,
+      data: allYears.map(y => valueMap[y] ?? null),
+      color: PALETTE[colorIdx % PALETTE.length]
+    });
+    colorIdx++;
+  }
+
+  if (datasets.length) mkLine(canvasId, labels, datasets);
+}
+
+function renderCBSUnemployment() {
+  const data = STATE.cbsData.unemployment || [];
+  if (!data.length) return;
+
+  // Filter: total sex (T001038), total age group, annual periods (JJ)
+  const filtered = data
+    .filter(r => r.Sex === 'T001038' && r.Periods && typeof r.Periods === 'string')
+    .filter(r => r.Periods.trim().includes('JJ') || r.Periods.trim().includes('KW'))
+    .map(r => ({
+      period: r.Periods.trim(),
+      value: r.NotSeasonallyAdjusted_7 // unemployment percentage
+    }))
+    .filter(r => r.value !== null && r.value !== undefined && typeof r.value === 'number')
+    .sort((a, b) => a.period.localeCompare(b.period))
+    .slice(-30);
+
+  if (!filtered.length) return;
+
+  const labels = filtered.map(r => r.period.replace(/\s+/g, '').replace('JJ00', '').replace('KW0', 'Q'));
+  mkBar('chart-cbs-unemployment', labels, filtered.map(r => r.value), 'Unemployment %', '#f59e0b');
+}
+
+function renderCBSVacancies() {
+  const data = STATE.cbsData.vacancies || [];
+  if (!data.length) return;
+
+  // Filter: total sectors (T001081), NL total (NL01), quarterly periods
+  const filtered = data
+    .filter(r => r.SIC2008 && r.SIC2008.trim() === 'T001081' && r.Regions && r.Regions.trim() === 'NL01')
+    .filter(r => r.Periods && typeof r.Periods === 'string')
+    .map(r => ({
+      period: r.Periods.trim(),
+      value: r.UnfilledVacancies_1
+    }))
+    .filter(r => r.value !== null && r.value !== undefined && typeof r.value === 'number')
+    .sort((a, b) => a.period.localeCompare(b.period))
+    .slice(-30);
+
+  if (!filtered.length) return;
+
+  const labels = filtered.map(r => r.period.replace(/\s+/g, '').replace('KW0', 'Q'));
+  mkLine('chart-cbs-vacancies', labels, [{ label: 'Vacancies (x1000)', data: filtered.map(r => r.value), color: '#3b82f6' }]);
+}
+
+function renderAIDataTable() {
+  const rows = [];
+  for (const [key, data] of Object.entries(STATE.owidData)) {
+    for (const row of data) {
+      if (!row.Year) continue;
+      const val = getNumericValue(row);
+      rows.push({
+        year: row.Year,
+        country: row.Entity || '—',
+        indicator: OWID_INDICATORS[key]?.label || key,
+        value: val !== null ? val.toFixed(2) : '—',
+        source: 'OWID'
+      });
+    }
+  }
+
+  // Sort by year desc, then country
+  rows.sort((a, b) => b.year - a.year || a.country.localeCompare(b.country));
+
+  document.getElementById('ai-data-body').innerHTML = rows.slice(0, 200).map(r => `
+    <tr>
+      <td class="mono">${r.year}</td>
+      <td>${r.country}</td>
+      <td class="mono">${r.indicator === 'Labor Productivity' ? r.value : '—'}</td>
+      <td class="mono">${r.indicator === 'Unemployment Rate' ? r.value : '—'}</td>
+      <td class="mono">${r.indicator === 'Labor Participation' ? r.value : '—'}</td>
+      <td><span class="source-tag owid">OWID</span></td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No data loaded</td></tr>';
+}
+
+// ─── DRAM: Render ────────────────────────────────────────────────────────────
+function getDRAMData() {
+  // Merge static + overrides
+  const overrides = STATE.dramOverrides || [];
+  const merged = {
+    ddr4: [...DRAM_DATA.series.ddr4],
+    ddr5: [...DRAM_DATA.series.ddr5]
+  };
+
+  // Apply overrides (replace by date+type match, or append)
+  for (const row of overrides) {
+    const type = (row.type || '').toLowerCase();
+    if (type !== 'ddr4' && type !== 'ddr5') continue;
+    const existing = merged[type].findIndex(r => r.date === row.date);
+    const entry = {
+      date: row.date,
+      pricePerGB: parseFloat(row.pricePerGB) || 0,
+      kitPrice: parseFloat(row.kitPrice) || 0,
+      capacity: parseInt(row.capacity) || 16
+    };
+    if (existing >= 0) merged[type][existing] = entry;
+    else merged[type].push(entry);
+  }
+
+  // Sort by date
+  merged.ddr4.sort((a, b) => a.date.localeCompare(b.date));
+  merged.ddr5.sort((a, b) => a.date.localeCompare(b.date));
+  return merged;
+}
+
+function renderDRAMCharts() {
+  const data = getDRAMData();
+  const metric = STATE.dramMetric;
+  const type = STATE.dramType;
+  const currency = STATE.dramSource === 'tweakers' ? '€' : '$';
+  const currencyLabel = STATE.dramSource === 'tweakers' ? 'EUR' : 'USD';
+
+  // Update chart title and button labels to reflect currency
+  const priceTitle = document.querySelector('#chart-dram-price')?.closest('.chart-card')?.querySelector('.chart-title span');
+  if (priceTitle) priceTitle.innerHTML = `Price per GB Over Time (${currencyLabel}) ${STATE.dramSource === 'tweakers' ? '<span class="source-tag cbs" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">Tweakers</span>' : ''}`;
+  const pgbBtn = document.getElementById('btn-price-per-gb');
+  if (pgbBtn) pgbBtn.textContent = `${currency}/GB`;
+
+  // Price chart
+  const allDates = [...new Set([...data.ddr4.map(r => r.date), ...data.ddr5.map(r => r.date)])].sort();
+  const ddr4Map = Object.fromEntries(data.ddr4.map(r => [r.date, r]));
+  const ddr5Map = Object.fromEntries(data.ddr5.map(r => [r.date, r]));
+
+  const datasets = [];
+  if (type === 'both' || type === 'ddr4') {
+    datasets.push({
+      label: 'DDR4',
+      data: allDates.map(d => ddr4Map[d]?.[metric] ?? null),
+      color: '#3b82f6'
+    });
+  }
+  if (type === 'both' || type === 'ddr5') {
+    datasets.push({
+      label: 'DDR5',
+      data: allDates.map(d => ddr5Map[d]?.[metric] ?? null),
+      color: '#f59e0b'
+    });
+  }
+
+  mkLine('chart-dram-price', allDates, datasets);
+
+  // Kit price bar chart
+  const kitDates = allDates.filter(d => ddr4Map[d] && ddr5Map[d]);
+  const last8 = kitDates.slice(-8);
+  if (last8.length) {
+    const ctx = document.getElementById('chart-dram-kit');
+    if (ctx) {
+      if (charts['chart-dram-kit']) charts['chart-dram-kit'].destroy();
+      charts['chart-dram-kit'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: last8,
+          datasets: [
+            { label: 'DDR4 Kit', data: last8.map(d => ddr4Map[d]?.kitPrice ?? 0), backgroundColor: '#3b82f699', borderColor: '#3b82f6', borderWidth: 1, borderRadius: 3 },
+            { label: 'DDR5 Kit', data: last8.map(d => ddr5Map[d]?.kitPrice ?? 0), backgroundColor: '#f59e0b99', borderColor: '#f59e0b', borderWidth: 1, borderRadius: 3 }
+          ]
+        },
+        options: chartDefaults()
+      });
+    }
+  }
+
+  // Premium chart
+  const premiumDates = allDates.filter(d => ddr4Map[d] && ddr5Map[d]);
+  if (premiumDates.length) {
+    mkLine('chart-dram-premium', premiumDates, [{
+      label: 'DDR5 Premium %',
+      data: premiumDates.map(d => {
+        const d4 = ddr4Map[d]?.pricePerGB || 1;
+        const d5 = ddr5Map[d]?.pricePerGB || 0;
+        return Math.round(((d5 - d4) / d4) * 100);
+      }),
+      color: '#8b5cf6'
+    }]);
+  }
+
+  renderDRAMStatCards(data);
+  renderDRAMTable(data);
+}
+
+function renderDRAMStatCards(data) {
+  const cur = STATE.dramSource === 'tweakers' ? '€' : '$';
+  const ddr4Latest = data.ddr4[data.ddr4.length - 1];
+  const ddr5Latest = data.ddr5[data.ddr5.length - 1];
+  const ddr4Prev = data.ddr4[data.ddr4.length - 5] || data.ddr4[0]; // ~1 year ago
+  const ddr5Prev = data.ddr5[data.ddr5.length - 5] || data.ddr5[0];
+
+  const premium = ddr4Latest && ddr5Latest ? Math.round(((ddr5Latest.pricePerGB - ddr4Latest.pricePerGB) / ddr4Latest.pricePerGB) * 100) : 0;
+  const ddr4YoY = ddr4Latest && ddr4Prev ? Math.round(((ddr4Latest.pricePerGB - ddr4Prev.pricePerGB) / ddr4Prev.pricePerGB) * 100) : 0;
+  const ddr5YoY = ddr5Latest && ddr5Prev ? Math.round(((ddr5Latest.pricePerGB - ddr5Prev.pricePerGB) / ddr5Prev.pricePerGB) * 100) : 0;
+
+  const cards = [
+    { label: `DDR4 ${cur}/GB`, value: ddr4Latest ? cur + ddr4Latest.pricePerGB.toFixed(2) : '—', icon: 'memory-stick', sub: `YoY ${ddr4YoY >= 0 ? '+' : ''}${ddr4YoY}%`, subClass: ddr4YoY <= 0 ? 'positive' : 'negative' },
+    { label: `DDR5 ${cur}/GB`, value: ddr5Latest ? cur + ddr5Latest.pricePerGB.toFixed(2) : '—', icon: 'cpu', sub: `YoY ${ddr5YoY >= 0 ? '+' : ''}${ddr5YoY}%`, subClass: ddr5YoY <= 0 ? 'positive' : 'negative' },
+    { label: 'DDR5 Premium', value: premium + '%', icon: 'arrow-up-right', sub: 'Over DDR4 per GB' },
+    { label: `DDR4 Kit (${ddr4Latest?.capacity || 16}GB)`, value: ddr4Latest ? cur + ddr4Latest.kitPrice : '—', icon: 'shopping-cart', sub: ddr4Latest?.date || '' },
+  ];
+
+  document.getElementById('dram-stat-cards').innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <i data-lucide="${c.icon}" style="width:14px;height:14px;color:var(--text-muted);"></i>
+        <span class="stat-label">${c.label}</span>
+      </div>
+      <div class="stat-value">${c.value}</div>
+      ${c.sub ? `<div class="stat-sub ${c.subClass || ''}">${c.sub}</div>` : ''}
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+function renderDRAMTable(data) {
+  const cur = STATE.dramSource === 'tweakers' ? '€' : '$';
+  const allRows = [
+    ...data.ddr4.map(r => ({ ...r, type: 'DDR4' })),
+    ...data.ddr5.map(r => ({ ...r, type: 'DDR5' }))
+  ].sort((a, b) => b.date.localeCompare(a.date) || a.type.localeCompare(b.type));
+
+  document.getElementById('dram-data-body').innerHTML = allRows.map(r => `
+    <tr>
+      <td class="mono">${r.date}</td>
+      <td><span class="badge ${r.type === 'DDR5' ? 'badge-amber' : 'badge-blue'}">${r.type}</span></td>
+      <td class="mono">${cur}${r.pricePerGB.toFixed(2)}</td>
+      <td class="mono">${cur}${r.kitPrice}</td>
+      <td class="mono">${r.capacity}GB</td>
+    </tr>
+  `).join('');
+}
+
+// ─── DRAM CSV Upload ─────────────────────────────────────────────────────────
+function handleDRAMUpload(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const parsed = Papa.parse(e.target.result, { header: true, dynamicTyping: true, skipEmptyLines: true });
+    if (parsed.errors.length) {
+      alert('CSV parse error: ' + parsed.errors[0].message);
+      return;
+    }
+    STATE.dramOverrides = parsed.data;
+    try { localStorage.setItem('statforge_dram_overrides', JSON.stringify(parsed.data)); } catch(e) {}
+    renderDRAMCharts();
+  };
+  reader.readAsText(file);
+}
+
+// ─── Controls ────────────────────────────────────────────────────────────────
+function toggleCountry(code, el) {
+  const idx = STATE.selectedCountries.indexOf(code);
+  if (idx >= 0) {
+    if (STATE.selectedCountries.length <= 1) return; // keep at least one
+    STATE.selectedCountries.splice(idx, 1);
+    el.classList.remove('active');
+  } else {
+    STATE.selectedCountries.push(code);
+    el.classList.add('active');
+  }
+  loadAIEconomy();
+}
+
+function setTimeRange(range, el) {
+  STATE.timeRange = range;
+  document.querySelectorAll('#section-ai-economy .controls-bar .control-group:nth-child(3) .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  loadAIEconomy();
+}
+
+function setDramType(type, el) {
+  STATE.dramType = type;
+  el.closest('.control-group').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderDRAMCharts();
+}
+
+function setDramMetric(metric, el) {
+  STATE.dramMetric = metric;
+  el.closest('.control-group').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderDRAMCharts();
+}
+
+// ─── Navigation ──────────────────────────────────────────────────────────────
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  STATE.activeSection = id;
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => Object.values(charts).forEach(c => c?.resize?.()));
+}
+
+// ─── Theme ───────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  const mc = document.getElementById('metaThemeColor');
+  if (mc) mc.setAttribute('content', isDark ? '#eff2f4' : '#09090b');
+  updateChartTheme();
+}
+
+function isLightTheme() {
+  return document.documentElement.getAttribute('data-theme') === 'light';
+}
+
+function updateChartTheme() {
+  const light = isLightTheme();
+  Chart.defaults.color = light ? '#4a5280' : '#a1a1aa';
+  Chart.defaults.borderColor = light ? '#cfd3e8' : '#27272a';
+  CHART_COLORS.grid = light ? 'rgba(226,229,240,0.3)' : 'rgba(63,63,70,0.4)';
+  CHART_COLORS.gridLight = light ? 'rgba(226,229,240,0.15)' : 'rgba(63,63,70,0.2)';
+  CHART_COLORS.text = light ? '#555570' : '#71717a';
+  // Re-render visible charts
+  if (STATE.activeSection === 'ai-economy' && STATE.owidData.productivity) renderAICharts();
+  if (STATE.activeSection === 'dram') renderDRAMCharts();
+}
+
+// ─── Source connectivity check ───────────────────────────────────────────────
+async function checkSources() {
+  const el = document.getElementById('source-status');
+  const results = [];
+
+  try {
+    const r = await fetch('https://ourworldindata.org/grapher/unemployment-rate.csv?csvType=filtered&useColumnShortNames=true&time=2020..2020&country=NLD', { method: 'HEAD' });
+    results.push(`OWID: ${r.ok ? '<span class="badge badge-green">OK</span>' : '<span class="badge badge-red">FAIL</span>'}`);
+  } catch(e) {
+    results.push('OWID: <span class="badge badge-red">FAIL</span>');
+  }
+
+  try {
+    const r = await fetch('https://opendata.cbs.nl/ODataApi/OData/80590eng?$format=json&$top=1');
+    results.push(`CBS: ${r.ok ? '<span class="badge badge-green">OK</span>' : '<span class="badge badge-red">FAIL</span>'}`);
+  } catch(e) {
+    results.push('CBS: <span class="badge badge-red">FAIL</span>');
+  }
+
+  // Check scraped CSV
+  try {
+    const dr = await fetch('dram_prices.csv', { method: 'HEAD' });
+    results.push(`DRAM Scraper: ${dr.ok ? '<span class="badge badge-green">CSV found</span>' : '<span class="badge badge-zinc">Static only</span>'}`);
+  } catch(e) {
+    results.push('DRAM Scraper: <span class="badge badge-zinc">Static only</span>');
+  }
+
+  results.push('DRAM Fallback: <span class="badge badge-green">Static</span>');
+  el.innerHTML = results.join('<br>');
+}
+
+// ─── Load Scraped DRAM CSV ────────────────────────────────────────────────────
+async function loadScrapedDRAM() {
+  try {
+    const resp = await fetch('dram_prices.csv');
+    if (!resp.ok) return; // no scraped data — use static fallback
+    const text = await resp.text();
+    if (!text.trim()) return;
+    const parsed = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true });
+    if (parsed.errors.length || !parsed.data.length) return;
+
+    STATE.dramOverrides = parsed.data;
+    STATE.dramSource = 'tweakers'; // flag that we loaded EUR data from scraper
+    log.info?.('Loaded scraped DRAM data:', parsed.data.length, 'rows');
+    console.log('[StatForge] Loaded scraped DRAM CSV:', parsed.data.length, 'rows from Tweakers.net');
+  } catch(e) {
+    // No scraped CSV — perfectly fine, static data will be used
+    console.log('[StatForge] No scraped CSV found, using static DRAM data');
+  }
+}
+
+// ─── Boot ────────────────────────────────────────────────────────────────────
+(async function boot() {
+  lucide.createIcons();
+
+  // Wire CSV upload
+  document.getElementById('csv-upload').addEventListener('change', e => handleDRAMUpload(e.target.files[0]));
+
+  // Drop zone for DRAM CSV
+  const dz = document.getElementById('dram-drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); handleDRAMUpload(e.dataTransfer.files[0]); });
+
+  // Load DRAM overrides from localStorage
+  try {
+    const saved = localStorage.getItem('statforge_dram_overrides');
+    if (saved) STATE.dramOverrides = JSON.parse(saved);
+  } catch(e) {}
+
+  // Try to load scraped Tweakers CSV, then render DRAM
+  await loadScrapedDRAM();
+  renderDRAMCharts();
+
+  // Fetch AI economy data
+  await loadAIEconomy();
+
+  // Show dashboard
+  document.getElementById('load-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+
+  // Background tasks
+  updateCacheStatus();
+  checkSources();
+
+  lucide.createIcons();
+})();
+</script>
+
+<!-- BSI Theme Bridge v1.1 -->
+<script>
+const ALLOWED_ORIGINS = ['https://blacksphereindustries.nl', 'https://www.blacksphereindustries.nl'];
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  ALLOWED_ORIGINS.push('http://localhost:8080');
+}
+function isAllowedOrigin(origin) { return ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.pages.dev'); }
+
+window.addEventListener('message', function(ev) {
+  if (!isAllowedOrigin(ev.origin)) return;
+  if (ev.data && ev.data.type === 'theme-change') {
+    if (ev.data.theme) {
+      const t = ev.data.theme === 'light' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      const mc = document.getElementById('metaThemeColor');
+      if (mc) mc.setAttribute('content', t === 'light' ? '#eff2f4' : '#09090b');
+      updateChartTheme();
+    }
+    if (ev.data.accentColor) {
+      document.documentElement.style.setProperty('--bsi-accent', ev.data.accentColor);
+      document.documentElement.style.setProperty('--bsi-accent-light', ev.data.accentLight);
+      document.documentElement.style.setProperty('--bsi-accent-dark', ev.data.accentDark);
+      if (ev.data.accentLighter) document.documentElement.style.setProperty('--bsi-accent-lighter', ev.data.accentLighter);
+      if (ev.data.accentLightest) document.documentElement.style.setProperty('--bsi-accent-lightest', ev.data.accentLightest);
+    }
+  }
+});
+if (window.parent !== window) {
+  try { window.parent.postMessage({ type: 'theme-request' }, '*'); } catch(e) {}
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
