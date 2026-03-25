@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
 :root {
@@ -140,6 +141,10 @@ tr:hover td { background: var(--bg-secondary); }
   <div style="display:flex;flex-direction:column;gap:1px;flex:1;" id="nav">
     <a class="nav-link active" onclick="showSection('ai-economy',this)">
       <i data-lucide="brain-circuit" style="width:14px;height:14px;"></i> AI Economy</a>
+    <a class="nav-link" onclick="showSection('ai-boom',this)">
+      <i data-lucide="rocket" style="width:14px;height:14px;"></i> AI Boom Tracker</a>
+    <a class="nav-link" onclick="showSection('compute',this)">
+      <i data-lucide="server" style="width:14px;height:14px;"></i> Compute & HW</a>
     <a class="nav-link" onclick="showSection('dram',this)">
       <i data-lucide="cpu" style="width:14px;height:14px;"></i> DRAM Market</a>
     <a class="nav-link" onclick="showSection('settings',this)">
@@ -255,6 +260,120 @@ tr:hover td { background: var(--bg-secondary); }
   </div>
 </div>
 
+<!-- AI BOOM TRACKER -->
+<div class="section" id="section-ai-boom">
+  <div style="margin-bottom:20px;">
+    <h1 style="font-size:22px;font-weight:800;margin-bottom:3px;">AI Boom Tracker</h1>
+    <p style="font-size:13px;color:var(--text-muted);">Investment, adoption, and research activity — tracking the AI wave via OWID data.</p>
+  </div>
+
+  <div class="error-banner" id="ai-boom-error"></div>
+  <div class="section-loading" id="ai-boom-loading">
+    <div class="spinner"></div><span>Fetching AI boom data...</span>
+  </div>
+
+  <div id="ai-boom-content" style="display:none;">
+    <!-- Investment -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:14px;font-weight:700;">AI Investment</span>
+      <span class="source-tag owid">OWID</span>
+    </div>
+    <div id="boom-invest-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;">
+      <div class="chart-card">
+        <div class="chart-title"><span>Private AI Investment (Global)</span></div>
+        <div style="position:relative;height:280px;"><canvas id="chart-ai-invest"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>Generative AI Investment (Global)</span></div>
+        <div style="position:relative;height:280px;"><canvas id="chart-genai-invest"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Adoption -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:14px;font-weight:700;">AI Adoption</span>
+      <span class="source-tag owid">OWID</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="chart-card">
+        <div class="chart-title"><span>Companies Using AI (%)</span></div>
+        <div style="position:relative;height:260px;"><canvas id="chart-ai-companies"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>Devs Using AI Tools (%)</span></div>
+        <div style="position:relative;height:260px;"><canvas id="chart-ai-devs"></canvas></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:28px;">
+      <div class="chart-card">
+        <div class="chart-title"><span>AI Job Postings Share (%)</span></div>
+        <div style="position:relative;height:280px;"><canvas id="chart-ai-jobs"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Research -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:14px;font-weight:700;">AI Research & Patents</span>
+      <span class="source-tag owid">OWID</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-title"><span>AI Publications (Annual)</span></div>
+        <div style="position:relative;height:260px;"><canvas id="chart-ai-pubs"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>AI Patent Applications</span></div>
+        <div style="position:relative;height:260px;"><canvas id="chart-ai-patents"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPUTE & HARDWARE -->
+<div class="section" id="section-compute">
+  <div style="margin-bottom:20px;">
+    <h1 style="font-size:22px;font-weight:800;margin-bottom:3px;">Compute & Hardware</h1>
+    <p style="font-size:13px;color:var(--text-muted);">GPU performance, AI training compute, datacenter spend & memory cost history.</p>
+  </div>
+
+  <div class="error-banner" id="compute-error"></div>
+  <div class="section-loading" id="compute-loading">
+    <div class="spinner"></div><span>Fetching compute data...</span>
+  </div>
+
+  <div id="compute-content" style="display:none;">
+    <div id="compute-stat-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px;"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="chart-card">
+        <div class="chart-title"><span>GPU Performance per Dollar <span class="source-tag owid">OWID</span></span></div>
+        <div style="position:relative;height:280px;"><canvas id="chart-gpu-perf"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>AI Training Compute (FLOP) <span class="source-tag owid">OWID</span></span></div>
+        <div style="position:relative;height:280px;"><canvas id="chart-ai-compute"></canvas></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="chart-card">
+        <div class="chart-title"><span>US Datacenter Construction Spend <span class="source-tag owid">OWID</span></span></div>
+        <div style="position:relative;height:260px;"><canvas id="chart-datacenter"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>Memory & Storage Cost History <span class="source-tag owid">OWID</span></span></div>
+        <div style="position:relative;height:260px;"><canvas id="chart-memory-cost"></canvas></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-title"><span>Transistors per Microprocessor (Moore's Law) <span class="source-tag owid">OWID</span></span></div>
+        <div style="position:relative;height:300px;"><canvas id="chart-moores-law"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- DRAM MARKET -->
 <div class="section" id="section-dram">
   <div style="margin-bottom:20px;">
@@ -358,8 +477,9 @@ tr:hover td { background: var(--bg-secondary); }
     <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
       <strong>StatForge</strong> — Statistics bureau data dashboard<br>
       Data sources: Our World in Data (OWID) &amp; CBS Netherlands<br>
+      AI Boom: investment, adoption, research, compute &amp; hardware (OWID)<br>
       DRAM data from Tweakers.net Pricewatch (scraped daily) + CSV uploads<br>
-      <span class="mono" style="font-size:11px;color:var(--text-muted);">v1.0.0 — Black Sphere Industries</span>
+      <span class="mono" style="font-size:11px;color:var(--text-muted);">v1.1.0 — Black Sphere Industries</span>
     </div>
   </div>
 </div>
@@ -446,6 +566,104 @@ const OWID_INDICATORS = {
   }
 };
 
+// ─── AI Boom & Compute OWID Indicators ──────────────────────────────────────
+// These are mostly global datasets (entity = "World"), not per-country
+const BOOM_INDICATORS = {
+  aiInvestment: {
+    slug: 'private-investment-in-artificial-intelligence-cset',
+    label: 'Private AI Investment',
+    entities: ['World'],
+    canvasId: 'chart-ai-invest',
+    unit: 'USD'
+  },
+  genaiInvestment: {
+    slug: 'global-investment-in-generative-ai',
+    label: 'GenAI Investment',
+    entities: ['World'],
+    canvasId: 'chart-genai-invest',
+    unit: 'USD'
+  },
+  aiCompanies: {
+    slug: 'share-companies-using-artificial-intelligence',
+    label: 'Companies Using AI',
+    entities: ['All geographies', 'North America', 'Europe', 'Asia-Pacific'],
+    canvasId: 'chart-ai-companies',
+    unit: '%'
+  },
+  aiDevs: {
+    slug: 'share-of-professional-software-developers-using-ai-tools',
+    label: 'Devs Using AI Tools',
+    entities: ['World'],
+    canvasId: 'chart-ai-devs',
+    unit: '%'
+  },
+  aiJobs: {
+    slug: 'share-artificial-intelligence-job-postings',
+    label: 'AI Job Postings',
+    entities: ['United States', 'United Kingdom', 'Germany', 'Netherlands'],
+    canvasId: 'chart-ai-jobs',
+    unit: '%'
+  },
+  aiPubs: {
+    slug: 'annual-scholarly-publications-on-artificial-intelligence',
+    label: 'AI Publications',
+    entities: ['World'],
+    canvasId: 'chart-ai-pubs',
+    unit: 'count'
+  },
+  aiPatents: {
+    slug: 'artificial-intelligence-patents-submitted',
+    label: 'AI Patent Applications',
+    entities: ['World'],
+    canvasId: 'chart-ai-patents',
+    unit: 'count'
+  }
+};
+
+const COMPUTE_INDICATORS = {
+  gpuPerf: {
+    slug: 'gpu-price-performance',
+    label: 'GPU Perf/Dollar',
+    entities: [],  // entities are GPU models, fetch all
+    canvasId: 'chart-gpu-perf',
+    unit: 'GFLOPS/$',
+    logScale: true,
+    scatter: true  // one data point per entity
+  },
+  aiCompute: {
+    slug: 'artificial-intelligence-training-computation',
+    label: 'AI Training Compute',
+    entities: [],  // entities are individual AI systems
+    canvasId: 'chart-ai-compute',
+    unit: 'FLOP',
+    logScale: true,
+    scatter: true
+  },
+  datacenter: {
+    slug: 'monthly-spending-data-center-us',
+    label: 'US Datacenter Spend',
+    entities: ['United States'],
+    canvasId: 'chart-datacenter',
+    unit: 'USD'
+  },
+  memoryCost: {
+    slug: 'historical-cost-of-computer-memory-and-storage',
+    label: 'Memory & Storage Cost',
+    entities: ['World'],
+    canvasId: 'chart-memory-cost',
+    unit: 'USD',
+    logScale: true
+  },
+  mooresLaw: {
+    slug: 'transistors-per-microprocessor',
+    label: "Transistors/Chip",
+    entities: ['World'],
+    canvasId: 'chart-moores-law',
+    unit: 'count',
+    logScale: true
+  }
+};
+
 // ─── Country Mapping ─────────────────────────────────────────────────────────
 const COUNTRY_MAP = {
   NLD: { owid: 'Netherlands', flag: '\ud83c\uddf3\ud83c\uddf1', cbs: true },
@@ -465,6 +683,8 @@ let STATE = {
   dramMetric: 'pricePerGB',
   owidData: {},      // keyed by indicator slug
   cbsData: {},       // keyed by table ID
+  boomData: {},      // keyed by BOOM_INDICATORS key
+  computeData: {},   // keyed by COMPUTE_INDICATORS key
   dramOverrides: [], // user-uploaded CSV
   lastFetch: null,
 };
@@ -575,7 +795,13 @@ function chartDefaults() {
     },
     scales: {
       x: { grid: { color: CHART_COLORS.gridLight }, ticks: { color: CHART_COLORS.text, maxRotation: 45, font: { family: "'JetBrains Mono'", size: 11 } } },
-      y: { grid: { color: CHART_COLORS.gridLight }, ticks: { color: CHART_COLORS.text, font: { family: "'JetBrains Mono'", size: 11 } } }
+      y: { grid: { color: CHART_COLORS.gridLight }, ticks: { color: CHART_COLORS.text, font: { family: "'JetBrains Mono'", size: 11 }, callback: function(val) {
+        if (Math.abs(val) >= 1e12) return (val / 1e12).toFixed(1) + 'T';
+        if (Math.abs(val) >= 1e9) return (val / 1e9).toFixed(1) + 'B';
+        if (Math.abs(val) >= 1e6) return (val / 1e6).toFixed(1) + 'M';
+        if (Math.abs(val) >= 1e3) return (val / 1e3).toFixed(1) + 'K';
+        return val;
+      } } }
     }
   };
 }
@@ -874,6 +1100,416 @@ function renderAIDataTable() {
   `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No data loaded</td></tr>';
 }
 
+// ─── Generic OWID fetch for global/multi-entity datasets ─────────────────────
+async function fetchOWIDGlobal(slug, entities) {
+  const entityParam = entities.map(e => encodeURIComponent(e)).join('~');
+  const csvUrl = `https://ourworldindata.org/grapher/${slug}.csv?useColumnShortNames=false&country=${entityParam}`;
+
+  const cached = getCached(csvUrl);
+  if (cached) return cached;
+
+  const res = await fetch(csvUrl);
+  if (!res.ok) throw new Error(`OWID ${slug}: ${res.status}`);
+  const text = await res.text();
+  const parsed = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true });
+  const data = parsed.data.filter(r => r.Year || r.Day);
+  setCache(csvUrl, data);
+  return data;
+}
+
+// ─── AI Boom Tracker: Fetch & Render ──────────────────────────────────────────
+async function loadAIBoom() {
+  const loading = document.getElementById('ai-boom-loading');
+  const content = document.getElementById('ai-boom-content');
+  const errorEl = document.getElementById('ai-boom-error');
+
+  loading.classList.add('visible');
+  content.style.display = 'none';
+  errorEl.classList.remove('visible');
+
+  const errors = [];
+
+  const fetches = Object.entries(BOOM_INDICATORS).map(async ([key, ind]) => {
+    try {
+      const data = await fetchOWIDGlobal(ind.slug, ind.entities);
+      STATE.boomData[key] = data;
+    } catch(e) {
+      errors.push(`${ind.label}: ${e.message}`);
+      STATE.boomData[key] = STATE.boomData[key] || [];
+    }
+  });
+
+  await Promise.allSettled(fetches);
+
+  loading.classList.remove('visible');
+  content.style.display = 'block';
+
+  if (errors.length) {
+    errorEl.textContent = errors.join(' | ');
+    errorEl.classList.add('visible');
+  }
+
+  renderBoomCharts();
+  renderBoomStatCards();
+}
+
+function renderBoomCharts() {
+  for (const [key, ind] of Object.entries(BOOM_INDICATORS)) {
+    const data = STATE.boomData[key] || [];
+    if (!data.length) continue;
+    renderGlobalChart(ind.canvasId, data, ind.entities, ind.label);
+  }
+}
+
+function renderGlobalChart(canvasId, data, entities, label) {
+  if (!data.length) return;
+
+  // Group by entity
+  const byEntity = {};
+  for (const row of data) {
+    const entity = row.Entity || '';
+    if (!byEntity[entity]) byEntity[entity] = [];
+    byEntity[entity].push(row);
+  }
+
+  // Use Year or Day column for x-axis
+  const hasDay = data[0]?.Day !== undefined && data[0]?.Day !== null;
+  const getX = hasDay ? (r => r.Day) : (r => r.Year);
+  const allX = [...new Set(data.map(getX).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
+  const labels = allX.map(String);
+
+  const datasets = [];
+  let colorIdx = 0;
+  for (const entity of entities) {
+    const rows = byEntity[entity];
+    if (!rows) continue;
+    const valueMap = {};
+    for (const row of rows) {
+      const val = getNumericValue(row);
+      if (val !== null) valueMap[getX(row)] = val;
+    }
+    datasets.push({
+      label: entity,
+      data: allX.map(x => valueMap[x] ?? null),
+      color: PALETTE[colorIdx % PALETTE.length]
+    });
+    colorIdx++;
+  }
+
+  if (datasets.length) mkLine(canvasId, labels, datasets);
+}
+
+function renderBoomStatCards() {
+  const cards = [];
+
+  // Latest AI investment
+  const investData = STATE.boomData.aiInvestment || [];
+  if (investData.length) {
+    const sorted = investData.filter(r => r.Year).sort((a, b) => b.Year - a.Year);
+    const latest = sorted[0];
+    const val = getNumericValue(latest);
+    if (val !== null) {
+      const billions = (val / 1e9).toFixed(1);
+      cards.push({ label: 'AI Investment', value: '$' + billions + 'B', icon: 'trending-up', sub: `Year ${latest.Year} · Global` });
+    }
+  }
+
+  // Latest GenAI investment
+  const genaiData = STATE.boomData.genaiInvestment || [];
+  if (genaiData.length) {
+    const sorted = genaiData.filter(r => r.Year).sort((a, b) => b.Year - a.Year);
+    const latest = sorted[0];
+    const val = getNumericValue(latest);
+    if (val !== null) {
+      const billions = (val / 1e9).toFixed(1);
+      cards.push({ label: 'GenAI Investment', value: '$' + billions + 'B', icon: 'sparkles', sub: `Year ${latest.Year} · Global` });
+    }
+  }
+
+  // AI job postings
+  const jobsData = STATE.boomData.aiJobs || [];
+  if (jobsData.length) {
+    const sorted = jobsData.filter(r => r.Year && (r.Entity === 'United States' || r.Entity === 'World')).sort((a, b) => b.Year - a.Year);
+    const latest = sorted[0];
+    if (latest) {
+      const val = getNumericValue(latest);
+      if (val !== null) {
+        cards.push({ label: 'AI Job Share', value: val.toFixed(2) + '%', icon: 'briefcase', sub: `${latest.Entity} ${latest.Year}` });
+      }
+    }
+  }
+
+  // AI publications
+  const pubsData = STATE.boomData.aiPubs || [];
+  if (pubsData.length) {
+    const sorted = pubsData.filter(r => r.Year).sort((a, b) => b.Year - a.Year);
+    const latest = sorted[0];
+    const val = getNumericValue(latest);
+    if (val !== null) {
+      const formatted = val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val.toFixed(0);
+      cards.push({ label: 'AI Publications', value: formatted, icon: 'book-open', sub: `Year ${latest.Year}` });
+    }
+  }
+
+  document.getElementById('boom-invest-cards').innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <i data-lucide="${c.icon}" style="width:14px;height:14px;color:var(--text-muted);"></i>
+        <span class="stat-label">${c.label}</span>
+      </div>
+      <div class="stat-value">${c.value}</div>
+      ${c.sub ? `<div class="stat-sub">${c.sub}</div>` : ''}
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+// ─── Compute & Hardware: Fetch & Render ──────────────────────────────────────
+async function fetchOWIDAll(slug) {
+  // Fetch all entities (no country filter) for scatter-type datasets
+  const csvUrl = `https://ourworldindata.org/grapher/${slug}.csv?useColumnShortNames=false`;
+
+  const cached = getCached(csvUrl);
+  if (cached) return cached;
+
+  const res = await fetch(csvUrl);
+  if (!res.ok) throw new Error(`OWID ${slug}: ${res.status}`);
+  const text = await res.text();
+  const parsed = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true });
+  const data = parsed.data.filter(r => r.Year || r.Day);
+  setCache(csvUrl, data);
+  return data;
+}
+
+async function loadCompute() {
+  const loading = document.getElementById('compute-loading');
+  const content = document.getElementById('compute-content');
+  const errorEl = document.getElementById('compute-error');
+
+  loading.classList.add('visible');
+  content.style.display = 'none';
+  errorEl.classList.remove('visible');
+
+  const errors = [];
+
+  const fetches = Object.entries(COMPUTE_INDICATORS).map(async ([key, ind]) => {
+    try {
+      const data = ind.scatter
+        ? await fetchOWIDAll(ind.slug)
+        : await fetchOWIDGlobal(ind.slug, ind.entities);
+      STATE.computeData[key] = data;
+    } catch(e) {
+      errors.push(`${ind.label}: ${e.message}`);
+      STATE.computeData[key] = STATE.computeData[key] || [];
+    }
+  });
+
+  await Promise.allSettled(fetches);
+
+  loading.classList.remove('visible');
+  content.style.display = 'block';
+
+  if (errors.length) {
+    errorEl.textContent = errors.join(' | ');
+    errorEl.classList.add('visible');
+  }
+
+  renderComputeCharts();
+  renderComputeStatCards();
+}
+
+function renderComputeCharts() {
+  for (const [key, ind] of Object.entries(COMPUTE_INDICATORS)) {
+    const data = STATE.computeData[key] || [];
+    if (!data.length) continue;
+
+    if (ind.scatter) {
+      renderScatterLogChart(ind.canvasId, data, ind.label);
+    } else if (ind.logScale) {
+      renderLogScaleChart(ind.canvasId, data, ind.entities, ind.label);
+    } else {
+      renderGlobalChart(ind.canvasId, data, ind.entities, ind.label);
+    }
+  }
+}
+
+function renderScatterLogChart(canvasId, data, label) {
+  // Each row is a separate data point (GPU model, AI system, etc.)
+  // Plot all on one scatter chart with date on x-axis, value on log y-axis
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  if (charts[canvasId]) charts[canvasId].destroy();
+
+  const points = data.map(row => {
+    const x = row.Day || (row.Year ? row.Year + '-06-15' : null);
+    const y = getNumericValue(row);
+    return x && y ? { x, y, label: row.Entity || '' } : null;
+  }).filter(Boolean).sort((a, b) => a.x.localeCompare(b.x));
+
+  if (!points.length) return;
+
+  const opts = chartDefaults();
+  opts.scales.x.type = 'time';
+  opts.scales.x.time = { unit: 'year', tooltipFormat: 'yyyy' };
+  opts.scales.y.type = 'logarithmic';
+  opts.scales.y.ticks.callback = function(val) {
+    if (val >= 1e18) return (val / 1e18).toFixed(0) + 'E';
+    if (val >= 1e15) return (val / 1e15).toFixed(0) + 'P';
+    if (val >= 1e12) return (val / 1e12).toFixed(0) + 'T';
+    if (val >= 1e9) return (val / 1e9).toFixed(0) + 'B';
+    if (val >= 1e6) return (val / 1e6).toFixed(0) + 'M';
+    if (val >= 1e3) return (val / 1e3).toFixed(0) + 'K';
+    return val;
+  };
+  opts.plugins.legend.display = false;
+  opts.plugins.tooltip.callbacks = {
+    label: function(ctx) {
+      const pt = points[ctx.dataIndex];
+      const val = ctx.parsed.y;
+      const fmt = val >= 1e9 ? (val / 1e9).toFixed(1) + 'B' : val >= 1e6 ? (val / 1e6).toFixed(1) + 'M' : val.toFixed(0);
+      return pt ? `${pt.label}: ${fmt}` : fmt;
+    }
+  };
+
+  charts[canvasId] = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label,
+        data: points.map(p => ({ x: p.x, y: p.y })),
+        backgroundColor: CHART_COLORS.primary + 'bb',
+        borderColor: CHART_COLORS.primary,
+        pointRadius: 4,
+        pointHoverRadius: 7
+      }]
+    },
+    options: opts
+  });
+}
+
+function renderLogScaleChart(canvasId, data, entities, label) {
+  if (!data.length) return;
+
+  const byEntity = {};
+  for (const row of data) {
+    const entity = row.Entity || '';
+    if (!byEntity[entity]) byEntity[entity] = [];
+    byEntity[entity].push(row);
+  }
+
+  const hasDay = data[0]?.Day !== undefined && data[0]?.Day !== null;
+  const getX = hasDay ? (r => r.Day) : (r => r.Year);
+  const allX = [...new Set(data.map(getX).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
+  const labels = allX.map(String);
+
+  const datasets = [];
+  let colorIdx = 0;
+  const allEntities = entities.length ? entities : Object.keys(byEntity).slice(0, 4);
+  for (const entity of allEntities) {
+    const rows = byEntity[entity];
+    if (!rows) continue;
+    const valueMap = {};
+    for (const row of rows) {
+      const val = getNumericValue(row);
+      if (val !== null) valueMap[getX(row)] = val;
+    }
+    datasets.push({
+      label: entity,
+      data: allX.map(x => valueMap[x] ?? null),
+      color: PALETTE[colorIdx % PALETTE.length]
+    });
+    colorIdx++;
+  }
+
+  if (!datasets.length) return;
+
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  if (charts[canvasId]) charts[canvasId].destroy();
+
+  const opts = chartDefaults();
+  opts.scales.y.type = 'logarithmic';
+  opts.scales.y.ticks.callback = function(val) {
+    if (val >= 1e18) return (val / 1e18).toFixed(0) + 'E';
+    if (val >= 1e15) return (val / 1e15).toFixed(0) + 'P';
+    if (val >= 1e12) return (val / 1e12).toFixed(0) + 'T';
+    if (val >= 1e9) return (val / 1e9).toFixed(0) + 'B';
+    if (val >= 1e6) return (val / 1e6).toFixed(0) + 'M';
+    if (val >= 1e3) return (val / 1e3).toFixed(0) + 'K';
+    return val;
+  };
+
+  charts[canvasId] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: datasets.map((ds, i) => ({
+        label: ds.label,
+        data: ds.data,
+        borderColor: ds.color || PALETTE[i % PALETTE.length],
+        backgroundColor: (ds.color || PALETTE[i % PALETTE.length]) + '22',
+        borderWidth: 2, pointRadius: 1.5, pointHoverRadius: 5,
+        fill: false, tension: 0.3, spanGaps: true
+      }))
+    },
+    options: opts
+  });
+}
+
+function renderComputeStatCards() {
+  const cards = [];
+
+  // GPU perf latest (uses Day, not Year; find highest perf GPU)
+  const gpuData = STATE.computeData.gpuPerf || [];
+  if (gpuData.length) {
+    const withVal = gpuData.map(r => ({ ...r, _val: getNumericValue(r) })).filter(r => r._val !== null);
+    const best = withVal.sort((a, b) => b._val - a._val)[0];
+    if (best) {
+      const val = best._val;
+      const fmt = val >= 1e9 ? (val / 1e9).toFixed(1) + 'B' : val >= 1e6 ? (val / 1e6).toFixed(0) + 'M' : val >= 1000 ? (val / 1000).toFixed(1) + 'K' : val.toFixed(0);
+      const dateStr = best.Day ? best.Day.substring(0, 4) : (best.Year || '');
+      cards.push({ label: 'Top GPU Perf/$', value: fmt, icon: 'zap', sub: `${best.Entity || ''} · ${dateStr}` });
+    }
+  }
+
+  // Datacenter spend
+  const dcData = STATE.computeData.datacenter || [];
+  if (dcData.length) {
+    const sorted = dcData.filter(r => r.Year || r.Day).sort((a, b) => (b.Year || b.Day || '').toString().localeCompare((a.Year || a.Day || '').toString()));
+    const latest = sorted[0];
+    const val = getNumericValue(latest);
+    if (val !== null) {
+      const millions = (val / 1e6).toFixed(0);
+      cards.push({ label: 'DC Spend (US)', value: '$' + millions + 'M', icon: 'server', sub: `Monthly · ${latest.Year || latest.Day || ''}` });
+    }
+  }
+
+  // Moore's law latest (uses Day, find most recent)
+  const mooreData = STATE.computeData.mooresLaw || [];
+  if (mooreData.length) {
+    const sorted = mooreData.filter(r => r.Year || r.Day).sort((a, b) => (b.Day || b.Year || '').toString().localeCompare((a.Day || a.Year || '').toString()));
+    const latest = sorted[0];
+    const val = getNumericValue(latest);
+    if (val !== null) {
+      const formatted = val >= 1e12 ? (val / 1e12).toFixed(1) + 'T' : val >= 1e9 ? (val / 1e9).toFixed(1) + 'B' : val >= 1e6 ? (val / 1e6).toFixed(0) + 'M' : val.toFixed(0);
+      const dateStr = latest.Day ? latest.Day.substring(0, 4) : (latest.Year || '');
+      cards.push({ label: 'Transistors/Chip', value: formatted, icon: 'cpu', sub: `${latest.Entity || ''} · ${dateStr}` });
+    }
+  }
+
+  document.getElementById('compute-stat-cards').innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <i data-lucide="${c.icon}" style="width:14px;height:14px;color:var(--text-muted);"></i>
+        <span class="stat-label">${c.label}</span>
+      </div>
+      <div class="stat-value">${c.value}</div>
+      ${c.sub ? `<div class="stat-sub">${c.sub}</div>` : ''}
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
 // ─── DRAM: Render ────────────────────────────────────────────────────────────
 function getDRAMData() {
   // Merge static + overrides
@@ -1088,6 +1724,17 @@ function showSection(id, el) {
   if (el) el.classList.add('active');
   STATE.activeSection = id;
   window.scrollTo(0, 0);
+
+  // Lazy-load data for new tabs on first visit
+  if (id === 'ai-boom' && !STATE._boomLoaded) {
+    STATE._boomLoaded = true;
+    loadAIBoom();
+  }
+  if (id === 'compute' && !STATE._computeLoaded) {
+    STATE._computeLoaded = true;
+    loadCompute();
+  }
+
   requestAnimationFrame(() => Object.values(charts).forEach(c => c?.resize?.()));
 }
 
@@ -1114,6 +1761,8 @@ function updateChartTheme() {
   CHART_COLORS.text = light ? '#555570' : '#71717a';
   // Re-render visible charts
   if (STATE.activeSection === 'ai-economy' && STATE.owidData.productivity) renderAICharts();
+  if (STATE.activeSection === 'ai-boom' && STATE._boomLoaded) renderBoomCharts();
+  if (STATE.activeSection === 'compute' && STATE._computeLoaded) renderComputeCharts();
   if (STATE.activeSection === 'dram') renderDRAMCharts();
 }
 
