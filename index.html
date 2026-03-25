@@ -191,6 +191,13 @@ tr:hover td { background: var(--bg-secondary); }
       <button class="toggle-btn" onclick="setTimeRange('20Y',this)">20Y</button>
       <button class="toggle-btn" onclick="setTimeRange('All',this)">All</button>
     </div>
+    <div style="width:1px;height:20px;background:var(--border);"></div>
+    <div class="control-group">
+      <span class="control-label">Granularity</span>
+      <button class="toggle-btn" onclick="setGranularity('monthly',this)">Monthly</button>
+      <button class="toggle-btn" onclick="setGranularity('quarterly',this)">Quarterly</button>
+      <button class="toggle-btn active" onclick="setGranularity('yearly',this)">Yearly</button>
+    </div>
   </div>
 
   <!-- Error banner -->
@@ -243,14 +250,14 @@ tr:hover td { background: var(--bg-secondary); }
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
         <div class="chart-card">
           <div class="chart-title">
-            <span>Unemployment (Monthly)</span>
+            <span id="cbs-unemp-title">Unemployment (Yearly)</span>
             <a class="source-link" href="https://opendata.cbs.nl/statline/#/CBS/en/dataset/80590eng" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> CBS 80590eng</a>
           </div>
           <div style="position:relative;height:260px;"><canvas id="chart-cbs-unemployment"></canvas></div>
         </div>
         <div class="chart-card">
           <div class="chart-title">
-            <span>Unfilled Vacancies</span>
+            <span id="cbs-vac-title">Unfilled Vacancies (Yearly)</span>
             <a class="source-link" href="https://opendata.cbs.nl/statline/#/CBS/en/dataset/83599ENG" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:10px;height:10px;"></i> CBS 83599ENG</a>
           </div>
           <div style="position:relative;height:260px;"><canvas id="chart-cbs-vacancies"></canvas></div>
@@ -739,6 +746,7 @@ let STATE = {
   activeSection: 'ai-economy',
   selectedCountries: ['NLD', 'USA'],
   timeRange: '10Y',
+  granularity: 'yearly', // monthly, quarterly, yearly
   dramType: 'both',
   dramMetric: 'pricePerGB',
   owidData: {},      // keyed by indicator slug
@@ -1085,47 +1093,85 @@ function renderIndicatorChart(canvasId, indicatorKey, countries) {
   if (datasets.length) mkLine(canvasId, labels, datasets);
 }
 
+function cbsPeriodFilter(period) {
+  const p = period.trim();
+  switch (STATE.granularity) {
+    case 'monthly':  return p.includes('MM');
+    case 'quarterly': return p.includes('KW');
+    default:         return p.includes('JJ');
+  }
+}
+
+function cbsPeriodLabel(period) {
+  const p = period.replace(/\s+/g, '');
+  if (p.includes('MM')) return p.replace(/(\d{4})MM(\d{2})/, '$1-$2');  // 2024MM01 → 2024-01
+  if (p.includes('KW')) return p.replace(/(\d{4})KW0?(\d)/, '$1 Q$2');  // 2024KW01 → 2024 Q1
+  return p.replace('JJ00', '');  // 2024JJ00 → 2024
+}
+
+function cbsSliceCount() {
+  switch (STATE.granularity) {
+    case 'monthly':  return 60;  // 5 years
+    case 'quarterly': return 30;
+    default:         return 20;
+  }
+}
+
 function renderCBSUnemployment() {
   const data = STATE.cbsData.unemployment || [];
   if (!data.length) return;
 
-  // Filter: total sex (T001038), total age group, annual periods (JJ)
   const filtered = data
     .filter(r => r.Sex === 'T001038' && r.Periods && typeof r.Periods === 'string')
-    .filter(r => r.Periods.trim().includes('JJ') || r.Periods.trim().includes('KW'))
+    .filter(r => cbsPeriodFilter(r.Periods))
     .map(r => ({
       period: r.Periods.trim(),
-      value: r.NotSeasonallyAdjusted_7 // unemployment percentage
+      value: r.NotSeasonallyAdjusted_7
     }))
     .filter(r => r.value !== null && r.value !== undefined && typeof r.value === 'number')
     .sort((a, b) => a.period.localeCompare(b.period))
-    .slice(-30);
+    .slice(-cbsSliceCount());
 
   if (!filtered.length) return;
 
-  const labels = filtered.map(r => r.period.replace(/\s+/g, '').replace('JJ00', '').replace('KW0', 'Q'));
-  mkBar('chart-cbs-unemployment', labels, filtered.map(r => r.value), 'Unemployment %', '#f59e0b');
+  const labels = filtered.map(r => cbsPeriodLabel(r.period));
+  const chartType = STATE.granularity === 'monthly' ? 'line' : 'bar';
+
+  const granLabel = STATE.granularity.charAt(0).toUpperCase() + STATE.granularity.slice(1);
+  const titleEl = document.getElementById('cbs-unemp-title');
+  if (titleEl) titleEl.textContent = `Unemployment (${granLabel})`;
+
+  if (chartType === 'line') {
+    mkLine('chart-cbs-unemployment', labels, [{ label: 'Unemployment %', data: filtered.map(r => r.value), color: '#f59e0b' }]);
+  } else {
+    mkBar('chart-cbs-unemployment', labels, filtered.map(r => r.value), 'Unemployment %', '#f59e0b');
+  }
 }
 
 function renderCBSVacancies() {
   const data = STATE.cbsData.vacancies || [];
   if (!data.length) return;
 
-  // Filter: total sectors (T001081), NL total (NL01), quarterly periods
+  // Vacancies only has quarterly data (KW) — always use KW
+  const periodFilter = (p => p.includes('KW'));
+
   const filtered = data
     .filter(r => r.SIC2008 && r.SIC2008.trim() === 'T001081' && r.Regions && r.Regions.trim() === 'NL01')
-    .filter(r => r.Periods && typeof r.Periods === 'string')
+    .filter(r => r.Periods && typeof r.Periods === 'string' && periodFilter(r.Periods.trim()))
     .map(r => ({
       period: r.Periods.trim(),
       value: r.UnfilledVacancies_1
     }))
     .filter(r => r.value !== null && r.value !== undefined && typeof r.value === 'number')
     .sort((a, b) => a.period.localeCompare(b.period))
-    .slice(-30);
+    .slice(-cbsSliceCount());
 
   if (!filtered.length) return;
 
-  const labels = filtered.map(r => r.period.replace(/\s+/g, '').replace('KW0', 'Q'));
+  const titleEl = document.getElementById('cbs-vac-title');
+  if (titleEl) titleEl.textContent = 'Unfilled Vacancies (Quarterly)';
+
+  const labels = filtered.map(r => cbsPeriodLabel(r.period));
   mkLine('chart-cbs-vacancies', labels, [{ label: 'Vacancies (x1000)', data: filtered.map(r => r.value), color: '#3b82f6' }]);
 }
 
@@ -1757,9 +1803,18 @@ function toggleCountry(code, el) {
 
 function setTimeRange(range, el) {
   STATE.timeRange = range;
-  document.querySelectorAll('#section-ai-economy .controls-bar .control-group:nth-child(3) .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.closest('.control-group').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   loadAIEconomy();
+}
+
+function setGranularity(gran, el) {
+  STATE.granularity = gran;
+  el.closest('.control-group').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  // Re-render charts with new granularity (no re-fetch needed, data is cached)
+  renderAICharts();
+  renderAIDataTable();
 }
 
 function setDramType(type, el) {
